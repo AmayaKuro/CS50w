@@ -1,0 +1,111 @@
+body {
+    background-color: #202124;
+}
+
+#navigate {
+    height: 60px;
+    border-bottom: 1px solid blanchedalmond;
+    position: relative;
+    padding: 0;
+    margin: 0;
+}
+
+#navigate ul {
+    display: flex;
+    list-style: none;
+}
+
+#navigate li {
+    flex: auto;
+}
+
+#navigate #left {
+    margin: auto;
+}
+
+#left span {
+    color: #e8edf3;
+    font-size: 2vw;
+}
+
+#navigate #right {
+    flex: auto;
+    padding: 15px;
+    text-align: right;
+}
+
+#right div {
+    display: inline;
+    margin: 15px;
+}
+
+a {
+    color: #999da2;
+}
+
+a:hover {
+    color: #999da2;
+    text-decoration: underline;
+}
+
+ul > span {
+    margin-top: auto;
+    font-size: 8vw;
+    color: white;
+    
+}
+
+#main {
+    padding-top: 2vw;
+    padding-left: 10vw;
+    color:aliceblue;
+}
+
+#name {
+    font-size: 36px;
+    color: rgb(222, 147, 147);
+}
+
+#intro {
+    font-size: large;
+    font: bold;
+}
+
+#form {
+    margin-top: 10px;
+}
+
+#form form > div > div {
+    display: inline;
+    
+}
+
+#form label {
+    width: 250px;
+}
+
+input[type=text] {
+    height: 25px;
+    width: 400px;
+    padding-left: 5px;
+    margin: 10px auto;
+    border-radius: 1px;
+    background-color: #303134;
+    border-color: blanchedalmond;
+    color:antiquewhite;
+}
+
+#button_holder {
+    padding-top: 30px;
+    padding-left: 504px;
+    position: relative;
+}
+
+#button_holder > input {
+    height: 35px;
+    width: 150px;
+    color: aliceblue;
+    border-radius: 5px;
+    background-color: #3863e5;
+    
+}   
