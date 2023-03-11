@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import Http404
+from markdown import markdown
 
 from . import util
 
@@ -16,5 +17,5 @@ def entry(request, title):
 
         return render(request, "encyclopedia/entry.html", {
             "title": title,
-            "entry": util.get_entry(title)
+            "entry": markdown(util.get_entry(title))
         })
