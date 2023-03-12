@@ -14,23 +14,31 @@ def index(request):
 
 def title(request, title):
     # Get matched entry
-    entry = util.get_entry(title)
+    name = util.get_entry(title)
 
     # if none, raise 404
-    if entry is None:
+    if name is None:
         raise Http404
-    # else return that entry
-    return render(request, "encyclopedia/entry.html", {
-        "title": title,
-        "entry": markdown(util.get_entry(title))
-    })
+    
+    else:
+        # Get entry's fomatted name
+        entries = util.list_entries()
+        for entry in entries:
+            if entry.lower() == title.lower():
+                title = entry
+
+        # Return that entry page and entry's fomatted name
+        return render(request, "encyclopedia/entry.html", {
+            "title": title,
+            "entry": markdown(util.get_entry(title))
+        })
 
 
 def search(request):
     # Take user's search
-    query = request.GET["q"].lower()
+    query = request.GET["q"]
 
-    # If matched with any entry, return that entry
+    # If matched with any entry, return that entry 
     if util.get_entry(query):
         return redirect(reverse("entry", kwargs={"title": query}))
     else:
@@ -40,11 +48,10 @@ def search(request):
 
         # For every entry, check if it contain user search disregard case
         for entry in entries:
-            if query in entry.lower():
+            if query.lower() in entry.lower():
                 matches += [entry]
 
         # Return matched entry 
         return render(request, "encyclopedia/search.html", {
-            "title": query,
             "matches": matches
         })
