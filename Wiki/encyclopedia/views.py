@@ -3,13 +3,20 @@ from django.http import Http404
 from django.urls import reverse
 from markdown import markdown
 from django import forms
+import pathlib
 
 from . import util
 
 
+class entry(forms.Form):
+    title = forms.CharField(label='title', max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Titlle'}))
+    body = forms.CharField(label='body', widget=forms.Textarea(attrs={'placeholder': 'Support Markdown !!!'}))
+
+
 def index(request):
-    return render(request, "encyclopedia/index.html",
-                  {"entries": util.list_entries()})
+    return render(request, "encyclopedia/index.html",{
+        "entries": util.list_entries()
+    })
 
 
 def title(request, title):
@@ -54,4 +61,39 @@ def search(request):
         # Return matched entry 
         return render(request, "encyclopedia/search.html", {
             "matches": matches
+        })
+
+
+def newpage(request):
+    exist = False
+
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = entry(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            titles = util.list_entries()
+            # If title had existed, return true to user
+            if form.cleaned_data["title"] in titles:
+                exist = True
+            else:
+                # Create the file's path in the storage of the entries
+                storage = pathlib.Path("entries", form.cleaned_data["title"] + ".md")
+                with open(storage, 'w') as file:
+                    # Store information of entry
+                    file.write(form.cleaned_data["body"])
+                
+                # redirect user to the entry that user submit
+                return redirect(reverse("entry", kwargs={"title": form.cleaned_data["title"]}))
+            
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = entry()
+
+    # Send data to user
+    return render(request, "encyclopedia/newpage.html", {
+            "title": "CREATE NEW PAGE",
+            "form": form,
+            "exist": exist,
         })

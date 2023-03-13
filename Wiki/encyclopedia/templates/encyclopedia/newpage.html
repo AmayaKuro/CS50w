@@ -1,0 +1,19 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block body %}
+    <h1>{{ title }}</h1>
+
+    {% if exist %}
+        <h3 style = "color: red;">Title already existed</h3>
+    {% endif %}
+
+    <form action="{% url "newpage" %}" method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Save Entry">
+    </form>
+{% endblock %}
