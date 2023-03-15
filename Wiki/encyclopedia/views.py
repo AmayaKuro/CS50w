@@ -3,6 +3,7 @@ from django.http import Http404
 from django.urls import reverse
 from markdown import markdown
 from django import forms
+from urllib.parse import unquote
 import pathlib
 
 from . import util
@@ -10,6 +11,9 @@ from . import util
 
 class entry(forms.Form):
     title = forms.CharField(label='title', max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Titlle'}))
+    body = forms.CharField(label='body', widget=forms.Textarea(attrs={'placeholder': 'Support Markdown !!!'}))
+
+class edit(forms.Form):
     body = forms.CharField(label='body', widget=forms.Textarea(attrs={'placeholder': 'Support Markdown !!!'}))
 
 
@@ -97,3 +101,38 @@ def newpage(request):
             "form": form,
             "exist": exist,
         })
+
+
+def editpage(request, title):
+    # Decode UTF-8 url encoded
+    title = unquote(title)
+    
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = edit(request.POST)
+
+        # check whether it's valid:
+        if form.is_valid():
+            # Create the file's path in the storage of the entries
+            storage = pathlib.Path("entries", title + ".md")
+
+            with open(storage, 'w') as file:
+                # Store information of entry
+                file.write(form.cleaned_data["body"])
+
+            # redirect user to the entry that user submit
+            return redirect(reverse("entry", kwargs={"title": title}))
+            
+    # if a GET (or any other method) we'll create a form that populated with old data
+    else:
+        data = {"body": util.get_entry(title)}
+        form = edit(data)
+
+    # Send data to user
+    return render(request, "encyclopedia/editpage.html", {
+            "title": "Edit Page",
+            "entry": title,
+            "form": form,
+        })
+
