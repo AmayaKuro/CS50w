@@ -5,6 +5,7 @@ from markdown import markdown
 from django import forms
 from urllib.parse import unquote
 import pathlib
+from random import choice
 
 from . import util
 
@@ -136,3 +137,7 @@ def editpage(request, title):
             "form": form,
         })
 
+
+def random(request):
+    titles = util.list_entries()
+    return redirect(reverse("entry", kwargs={"title": choice(titles)}))
