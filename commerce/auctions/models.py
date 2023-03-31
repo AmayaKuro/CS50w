@@ -5,11 +5,14 @@ from django.db import models
 
 class User(AbstractUser):
     pass
-
+    
 
 class auction_list(models.Model):
-    name = models.CharField(max_length=64)
-    price = models.IntegerField()
+    title = models.CharField(max_length=64)
+    description = models.CharField(max_length=256)
+    price = models.FloatField()
+    catagory = models.CharField(blank=True, max_length=64)
+    image_url = models.URLField(blank=True)
 
 
 class comments(models.Model):

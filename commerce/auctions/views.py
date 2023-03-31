@@ -1,11 +1,26 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from django import forms
+
+import urllib.request
+import imghdr
 
 from .models import User
+from .forms import *
+
+
+def CheckURLimage(url):
+    try:
+        with urllib.request.urlopen(url) as url_file:
+            headers = url_file.info()
+            content_type = headers.get('Content-Type')
+            if content_type.startswith('image/'):
+                return imghdr.what(None, url_file.read(256))
+    except:
+        return False
 
 
 def index(request):
@@ -25,9 +40,8 @@ def login_view(request):
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
         else:
-            return render(request, "auctions/login.html", {
-                "message": "Invalid username and/or password."
-            })
+            return render(request, "auctions/login.html",
+                          {"message": "Invalid username and/or password."})
     else:
         return render(request, "auctions/login.html")
 
@@ -46,39 +60,49 @@ def register(request):
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
         if password != confirmation:
-            return render(request, "auctions/register.html", {
-                "message": "Passwords must match."
-            })
+            return render(request, "auctions/register.html",
+                          {"message": "Passwords must match."})
 
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
         except IntegrityError:
-            return render(request, "auctions/register.html", {
-                "message": "Username already taken."
-            })
+            return render(request, "auctions/register.html",
+                          {"message": "Username already taken."})
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
-    
+
 
 def create(request):
-    class item(forms.Form):
-        title = forms.CharField(max_length = 64)
-        description = forms.CharField(widget=forms.Textarea)
-        start_bid = forms.DecimalField()
-        category = forms.CharField(max_length=64)
-    
+
     if request.method == "POST":
-        form = item(request.POST)
+        # Populate form with POST data
+        form = items(request.POST)
 
-        if form.is_valid: 
-            form.cleaned_data["title"] 
+        if form.is_valid():
+            try:
+                if float(form.cleaned_data["price"]) <= 0:
+                    messages.error(request, "Price must be above $0")
+            except:
+                messages.error(request, "Invalid price")
 
+            if form.cleaned_data["image_url"] == "":
+                pass
+            elif not CheckURLimage(form.cleaned_data["image_url"]):
+                messages.error(request, "URL is not an image")
+
+            if any(message.level == 40 for message in messages.get_messages(request)):
+                return render(request, "auctions/create.html", {
+                    "form": form,
+                })
+            else:
+                form.save()
+                return HttpResponseRedirect(reverse("index"))
     else:
-        form = item()
-    return render(request, "auctions/create.html", {
-        "form": form
-    })
+        form = items()
+        return render(request, "auctions/create.html", {
+            "form": form,
+        })
