@@ -24,7 +24,10 @@ def CheckURLimage(url):
 
 
 def index(request):
-    auctions = auctionList.objects.all().order_by("status").values
+    auctions = auctionList.objects.values_list(
+        "title", "imageURL", "price", 
+        "description", "createTime", "status",
+        ).order_by("status").values()
 
     return render(request, "auctions/index.html", {
         "auctions": auctions
@@ -119,7 +122,8 @@ def create(request):
 
 
 def listing(request, title):
-    pass
+    List = auctionList.objects.all()
+    print (List)
 
 
 def watch_list(request):
