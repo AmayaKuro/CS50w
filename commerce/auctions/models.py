@@ -1,23 +1,29 @@
 from django.contrib.auth.models import AbstractUser
 
 from django.db import models
+from django.conf import settings
 
 
 class User(AbstractUser):
     pass
     
 
-class auction_list(models.Model):
+class auctionList(models.Model):
     title = models.CharField(max_length=64)
     description = models.CharField(max_length=256)
     price = models.FloatField()
-    catagory = models.CharField(blank=True, max_length=64)
-    image_url = models.URLField(blank=True)
-
+    catagory = models.CharField(blank=True, null=True ,max_length=64)
+    imageURL = models.URLField(blank=True, null=True)
+    createTime = models.DateTimeField(auto_now_add=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owner")
+    highestBidder = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="bidder")
+    status = models.BooleanField(default=True)
 
 class comments(models.Model):
     comment = models.CharField(max_length=256)
-    auction_list = models.ForeignKey(auction_list, on_delete=models.CASCADE)
-    commenter = models.ForeignKey(User, on_delete=models.CASCADE)
+    auctionList = models.ForeignKey(auctionList, on_delete=models.CASCADE, related_name="auctionList")
+    commenter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-# create relation between comments with user & auction_list with user's watchlist
+class watchList:
+    user = models.OneToOneField
+# create relation between comments with user & auctionList with user's watchlist

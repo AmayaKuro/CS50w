@@ -1,3 +1,49 @@
 body {
     padding: 10px;
 }
+
+#list {
+    list-style-type: none;
+    padding: 0px;
+}
+
+.wrapper {
+    padding: 1rem 0px;
+    border-bottom: 1px solid #ccc;
+}
+
+.wrapper:last-child {
+    border-bottom: none;
+}
+
+.wrapper:hover {
+    background-color: #eee;
+}
+
+.wrapper > a {
+    text-decoration: none;
+    display: flex;
+}
+
+.image-container {
+    min-width: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-container > img {
+    max-width: 400px;
+    max-height: 25vw;
+}
+
+.content-container{
+    margin-left: 1rem;
+}
+
+.content-container > div {
+    color: black;
+    margin-bottom: 0.5rem;
+    max-width: 50vw;
+    overflow-wrap: break-word;
+}

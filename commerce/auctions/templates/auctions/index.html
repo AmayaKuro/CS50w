@@ -2,6 +2,35 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-
-    TODO
+    <ul id="list">
+        {% for auction in auctions %}
+            <li class="wrapper">
+                <a href="{% url "listing" title=auction.title %}">
+                    {% if auction.imageURL %}
+                        <div class="image-container">
+                            <img src="{{ auction.imageURL }}">
+                        </div>
+                    {% endif %}
+                    <div class="content-container">
+                        <div>
+                            <h2>{{ auction.title }}</h2> 
+                        </div>
+                        <div>
+                            <strong>Price:</strong> ${{ auction.price }}
+                        </div>
+                        <div>
+                            {{ auction.description }}
+                        </div>
+                        <!-- TODO: finish Create at "datetime"-->
+                        <div style="color: #788;">
+                            <span>Created {{ auction.createTime }}</span>
+                        </div>
+                        <div>
+                            <strong>Status: </strong> {% if auction.status %} Open {% else %} Closed {% endif %}
+                        </div>
+                    </div>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock %}

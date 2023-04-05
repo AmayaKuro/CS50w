@@ -8,7 +8,7 @@ from django.urls import reverse
 import urllib.request
 import imghdr
 
-from .models import User
+from .models import *
 from .forms import *
 
 
@@ -24,7 +24,11 @@ def CheckURLimage(url):
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    auctions = auctionList.objects.all()
+
+    return render(request, "auctions/index.html", {
+        "auctions": auctions
+    })
 
 
 def login_view(request):
@@ -77,7 +81,6 @@ def register(request):
 
 
 def create(request):
-
     if request.method == "POST":
         # Populate form with POST data
         form = items(request.POST)
@@ -89,9 +92,9 @@ def create(request):
             except:
                 messages.error(request, "Invalid price")
 
-            if form.cleaned_data["image_url"] == "":
+            if form.cleaned_data["imageURL"] == "":
                 pass
-            elif not CheckURLimage(form.cleaned_data["image_url"]):
+            elif not CheckURLimage(form.cleaned_data["imageURL"]):
                 messages.error(request, "URL is not an image")
 
             if any(message.level == 40 for message in messages.get_messages(request)):
@@ -99,10 +102,29 @@ def create(request):
                     "form": form,
                 })
             else:
-                form.save()
+                user = User.objects.get(username=request.user)
+
+                data = form.save(commit=False)
+                
+                data.owner = user
+                data.highestBidder = user
+
+                data.save()
                 return HttpResponseRedirect(reverse("index"))
     else:
         form = items()
         return render(request, "auctions/create.html", {
             "form": form,
         })
+
+
+def listing(request, title):
+    pass
+
+
+def watch_list(request):
+    pass
+
+
+def categories(request):
+    pass
