@@ -24,7 +24,7 @@ def CheckURLimage(url):
 
 
 def index(request):
-    auctions = auctionList.objects.all()
+    auctions = auctionList.objects.all().order_by("status").values
 
     return render(request, "auctions/index.html", {
         "auctions": auctions
