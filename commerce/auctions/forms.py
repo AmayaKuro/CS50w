@@ -14,3 +14,17 @@ class items(forms.ModelForm):
             "imageURL": "Image URL",
         }
 
+
+class comment(forms.ModelForm):
+    class Meta:
+        model = comments
+        fields = ["comment", "auctionList"]
+        widgets = {
+            "comment": forms.Textarea(attrs={"rows": 5, "cols": 80, "id": "comment", "placeholder": "Comment..."}),
+            "auctionList": forms.HiddenInput(),
+        }
+        labels = {
+            "comment": "Add a comment:"
+        }
+
+

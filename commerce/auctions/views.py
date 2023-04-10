@@ -4,12 +4,17 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+
 
 import urllib.request
+import json
 import imghdr
 
 from .models import *
-from .forms import *
+# find out why need "".""
+from . import forms
 
 
 def CheckURLimage(url):
@@ -25,9 +30,9 @@ def CheckURLimage(url):
 
 def index(request):
     auctions = auctionList.objects.values_list(
-        "title", "imageURL", "price", 
+        "id", "title", "imageURL", "price",
         "description", "createTime", "status",
-        ).order_by("status").values()
+    ).order_by("-status").values()
 
     return render(request, "auctions/index.html", {
         "auctions": auctions
@@ -83,15 +88,17 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
+@login_required(login_url="login")
 def create(request):
     if request.method == "POST":
         # Populate form with POST data
-        form = items(request.POST)
+        form = forms.items(request.POST)
 
         if form.is_valid():
             try:
-                if float(form.cleaned_data["price"]) <= 0:
-                    messages.error(request, "Price must be above $0")
+                if float(form.cleaned_data["price"]) < 0:
+                    messages.error(
+                        request, "Price must be greater or equal to $0")
             except:
                 messages.error(request, "Invalid price")
 
@@ -105,27 +112,94 @@ def create(request):
                     "form": form,
                 })
             else:
-                user = User.objects.get(username=request.user)
-
                 data = form.save(commit=False)
-                
-                data.owner = user
-                data.highestBidder = user
+
+                data.owner = request.user
+                data.highestBidder = request.user
 
                 data.save()
                 return HttpResponseRedirect(reverse("index"))
     else:
-        form = items()
+        form = forms.items()
         return render(request, "auctions/create.html", {
             "form": form,
         })
 
 
-def listing(request, title):
-    List = auctionList.objects.all()
-    print (List)
+@login_required(login_url="login")
+def listing(request, id):
+    List = auctionList.objects.get(id=id)
+    commentList = comments.objects.filter(auctionList=List)
+
+    if request.method == "POST":
+        try:
+            bid = float(request.POST["bid"])
+        except:
+            messages.error(request, "Invalid bid!")
+        else:
+            if bid > List.price:
+                List.price = bid
+                List.highestBidder = request.user
+                List.save()
+            else:
+                messages.error(
+                    request, "Bid must be greater than previous bid!")
+
+        return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+    else:
+        commentBox = forms.comment()
+
+        owner = List.owner.username
+        highestBidder = List.highestBidder.username
+
+        username = str(request.user)
+        return render(request, "auctions/listing.html", {
+            "List": List,
+            "owner": owner,
+            "isOwner": owner == username,
+            "isHighestBidder": highestBidder == username,
+            "commentBox": commentBox,
+            "commentList": commentList,
+        })
 
 
+@login_required(login_url="login")
+def commenting(request):
+    if request.method == "POST":
+
+        comment = forms.comment(request.POST)
+        if comment["auctionList"] and comment["comment"]:
+            comment = comment.save(commit=False)
+
+            comment.commenter = request.user
+
+            comment.save()
+
+            return HttpResponseRedirect(reverse(listing, args=[request.POST["auctionList"]]))
+    else:
+        return HttpResponseRedirect("/")
+
+
+@login_required(login_url="login")
+@csrf_protect
+def delete(request):
+    # TODO: turn status to false
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        List = auctionList.objects.get(id=data["list"])
+        if data["status"] == "close":
+            if str(List.owner) == str(request.user):
+                List.status = False
+                List.save()
+                print(List.status)
+            else:
+                messages.error(request, "You don't have permission to do this action!")
+        else:
+            messages.error(request, "Invalid request!")
+    return HttpResponseRedirect(reverse(listing, args=[data["list"]]))
+        
+
+@login_required(login_url="login")
 def watch_list(request):
     pass
 

@@ -22,7 +22,7 @@ class auctionList(models.Model):
 class comments(models.Model):
     comment = models.CharField(max_length=256)
     auctionList = models.ForeignKey(auctionList, on_delete=models.CASCADE, related_name="auctionList")
-    commenter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    commenter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="commenter")
 
 class watchList:
     user = models.OneToOneField
