@@ -1,0 +1,31 @@
+#list-img {
+    max-height: 50vh;
+}
+
+textarea {
+    margin-bottom: 10px;
+    padding: 0.3rem 0.5rem;
+    display: block;
+    border-style: solid;
+    border-color: #ced4da;
+    border-radius: .5rem;
+}
+
+#comment-container {
+    padding: 1rem 1rem;
+    margin: 1rem auto;
+    border-style: solid;
+    border-color: #ced4da;
+    border-radius: .5rem;
+    max-width: 80%;
+    max-height: 70%;
+    overflow: auto;
+}
+
+#comment-container .comment {
+    margin-left: 1rem;
+}
+
+#comment-container hr:last-child {
+    display: none;
+}
