@@ -24,7 +24,7 @@ class comment(forms.ModelForm):
             "auctionList": forms.HiddenInput(),
         }
         labels = {
-            "comment": "Add a comment:"
+            "comment": "Leave a comment:"
         }
 
 

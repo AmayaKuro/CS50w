@@ -19,11 +19,13 @@ class auctionList(models.Model):
     highestBidder = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="bidder")
     status = models.BooleanField(default=True)
 
+
 class comments(models.Model):
     comment = models.CharField(max_length=256)
     auctionList = models.ForeignKey(auctionList, on_delete=models.CASCADE, related_name="auctionList")
     commenter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="commenter")
 
-class watchList:
-    user = models.OneToOneField
-# create relation between comments with user & auctionList with user's watchlist
+
+class watchList(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user")
+    watchList = models.ManyToManyField(auctionList, related_name="list")

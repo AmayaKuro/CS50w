@@ -1,23 +1,29 @@
 {% extends "auctions/layout.html" %}
 {% load static %}
 
+
 {% block title %}
     Listing
 {% endblock %}
 
+
 {% block body %}
-<h2>
-    Listing: {{ List.title }} ||
-    {% if List.status %}
-    <div style="color: #59f427; display:contents;">
-        Status: OPEN
+    <div class="header">
+        <h2>
+            Listing: {{ List.title }} ||
+            {% if List.status %}
+            <div style="color: #59f427; display:contents;">
+                Status: OPEN
+            </div>
+            {% else %}
+                <div style="color: #ec8826; display:contents;">
+                    Status: CLOSED
+                </div>
+            {% endif %}
+        </h2>
+        <!-- rape this button -->
+        <button class="btn" id="watch-list-listing" onclick="watchList(this, {{ List.id }}, 'change')">Watch List</button>
     </div>
-    {% else %}
-        <div style="color: #ec8826; display:contents;">
-            Status: CLOSED
-        </div>
-    {% endif %}
-</h2>
 
     {% if List.imageURL %}
         <img id="list-img" src="{{ List.imageURL }}">
@@ -85,5 +91,8 @@
 {% endblock %}
 
 {% block javascript %}
+    <script type="text/javascript">
+        watchList(document.querySelector("#watch-list-listing"), {{ List.id }}, 'check')
+    </script>
     <link href="{% static 'auctions/list.css' %}?verson=1" rel="stylesheet">
 {% endblock %}

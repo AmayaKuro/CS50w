@@ -8,16 +8,20 @@ body {
 }
 
 .wrapper {
-    padding: 1rem 0px;
-    border-bottom: 1px solid #ccc;
-}
-
-.wrapper:last-child {
-    border-bottom: none;
+    padding: 1rem .5rem;
+    border: 1px solid #ccc;
+    margin: 1rem 0;
+    position: relative;
 }
 
 .wrapper:hover {
     background-color: #eee;
+}
+
+.watch-list {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
 }
 
 .wrapper > a {
@@ -39,6 +43,10 @@ body {
 
 .content-container{
     margin-left: 1rem;
+}
+
+.content-container:only-child{
+    margin-left: 3rem;
 }
 
 .content-container > div {

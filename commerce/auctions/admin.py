@@ -5,3 +5,4 @@ from .models import *
 admin.site.register(auctionList)
 admin.site.register(User)
 admin.site.register(comments)
+admin.site.register(watchList)

@@ -1,3 +1,11 @@
+.header {
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.header div {
+    display: block;
+}
 #list-img {
     max-height: 50vh;
 }
@@ -28,4 +36,8 @@ textarea {
 
 #comment-container hr:last-child {
     display: none;
+}
+
+#watch-list-listing {
+    position: relative;
 }

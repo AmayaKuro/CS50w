@@ -6,10 +6,11 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 
-import urllib.request
 import json
+import urllib.request
 import imghdr
 
 from .models import *
@@ -82,6 +83,10 @@ def register(request):
         except IntegrityError:
             return render(request, "auctions/register.html",
                           {"message": "Username already taken."})
+        # Create empty watch list for new user
+        userWatchList = watchList(user=request.user)
+        userWatchList.save()
+
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     else:
@@ -197,11 +202,50 @@ def delete(request):
         else:
             messages.error(request, "Invalid request!")
     return HttpResponseRedirect(reverse(listing, args=[data["list"]]))
-        
+
 
 @login_required(login_url="login")
 def watch_list(request):
-    pass
+    watchingList = watchList.objects.get(user=request.user).watchList.all().order_by("-status")
+
+    return render(request, "auctions/watchlist.html", {
+        "watchingList": watchingList,
+    })
+        
+
+@login_required(login_url="login")
+@csrf_protect
+def watchListModify(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        respone = {}
+
+        userWatchList = watchList.objects.get(user=request.user)
+        
+        # Check if watch list had request's list or not.
+        checker = userWatchList.watchList.filter(pk=data["list"]).exists()
+    
+        try:
+            # If purpose is to change and list existed in user watch list, remove list out of watch list and vice versa
+            if data["purpose"] == "change":
+                if checker:
+                    userWatchList.watchList.remove(auctionList.objects.get(id=data["list"]))
+                    respone["state"] = 0
+                else:
+                    userWatchList.watchList.add(auctionList.objects.get(id=data["list"]))
+                    respone["state"] = 1
+            # else if purpose is to check, send check result 
+            else:
+                if checker: 
+                    respone["state"] = 1
+                else: 
+                    respone["state"] = 0
+
+            respone["status"] = 1
+        except:
+            respone["status"] = 0
+            
+        return JsonResponse(respone)
 
 
 def categories(request):
