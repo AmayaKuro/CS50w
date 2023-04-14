@@ -2,34 +2,5 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-    <ul id="list">
-        {% for auction in auctions %}
-            <li class="wrapper">
-                <a href="{% url "listing" id=auction.id %}">
-                    {% if auction.imageURL %}
-                        <div class="image-container">
-                            <img src="{{ auction.imageURL }}">
-                        </div>
-                    {% endif %}
-                    <div class="content-container">
-                        <div>
-                            <h2>{{ auction.title }}</h2> 
-                        </div>
-                        <div>
-                            <strong>Price:</strong> ${{ auction.price }}
-                        </div>
-                        <div>
-                            {{ auction.description }}
-                        </div>
-                        <div style="color: #788;">
-                            <span>Created {{ auction.createTime }}</span>
-                        </div>
-                        <div>
-                            <strong>Status: </strong> {% if auction.status %} Open {% else %} Closed {% endif %}
-                        </div>
-                    </div>
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+    {% include "auctions/auctionList.html" %}
 {% endblock %}

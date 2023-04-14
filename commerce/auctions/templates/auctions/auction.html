@@ -3,15 +3,15 @@
 
 
 {% block title %}
-    Listing
+    Auction
 {% endblock %}
 
 
 {% block body %}
     <div class="header">
         <h2>
-            Listing: {{ List.title }} ||
-            {% if List.status %}
+            Auction: {{ auction.title }} ||
+            {% if auction.status %}
             <div style="color: #59f427; display:contents;">
                 Status: OPEN
             </div>
@@ -21,17 +21,16 @@
                 </div>
             {% endif %}
         </h2>
-        <!-- rape this button -->
-        <button class="btn" id="watch-list-listing" onclick="watchList(this, {{ List.id }}, 'change')">Watch List</button>
+        <button class="btn" id="watch-list-auction" onclick="watchList(this, {{ auction.id }}, 'change')">Watch List</button>
     </div>
 
-    {% if List.imageURL %}
-        <img id="list-img" src="{{ List.imageURL }}">
+    {% if auction.imageURL %}
+        <img id="auction-img" src="{{ auction.imageURL }}">
     {% endif %}
-    <p style="font-size: 18px; margin-top: .5rem;">{{ List.description }}</p>
-    <h3>Current bid: ${{ List.price }}</h3>
+    <p style="font-size: 18px; margin-top: .5rem;">{{ auction.description }}</p>
+    <h3>Current bid: ${{ auction.price }}</h3>
     <p>You're currently {% if not isHighestBidder %} <strong>not</strong> {% endif %} the highest Bidder</p>
-    {% if List.status %}
+    {% if auction.status %}
         <form method="POST">
             {% csrf_token %}
             <div class="input-group mb-3">
@@ -45,17 +44,17 @@
             </div>
         </form>
     {% else %}
-        <p>The winner of this auction is <strong>{{ List.highestBidder.username }}</strong></P>
+        <p>The winner of this auction is <strong>{{ auction.highestBidder.username }}</strong></P>
     {% endif %}
     <div style="margin-top: 1rem;">
         <h3>Details</h3>
         <ul>
             <li>
-                Owner: <strong>{{ List.owner.username }}</strong>
+                Owner: <strong>{{ auction.owner.username }}</strong>
             </li>
             <li>
                 Category: 
-                <strong>{% if List.catagory %} {{ List.catagory }} {% else %} No Category Listed {% endif %}</strong>
+                <strong>{% if auction.category %} {{ auction.category }} {% else %} No Category Listed {% endif %}</strong>
             </li>
         </ul>
     </div>
@@ -64,7 +63,7 @@
     <div>
         <form action="comment" method="POST">
             {% csrf_token %}
-            <input type="hidden" name="{{ commentBox.auctionList.name }}" value="{{ List.id }}">
+            <input type="hidden" name="{{ commentBox.auctionList.name }}" value="{{ auction.id }}">
             <label for="{{ commentBox.comment.name }}">{{ commentBox.comment.label }}</label>
             {{ commentBox.comment }}
             <input type="submit" class="btn btn-outline-secondary" value="Add">
@@ -81,18 +80,18 @@
     </div>
 
     {% if isOwner %}
-        {% if List.status %}
+        {% if auction.status %}
             <hr>
             <h3>For Owner:</h3>
-            <p style="display: inline-block; margin-right: .5rem;">Close this List?</p>
-            <button class="btn btn-danger" onclick="closeList({{ List.id }})">Close List</button>
+            <p style="display: inline-block; margin-right: .5rem;">Close this Auction?</p>
+            <button class="btn btn-danger" onclick="closeList({{ auction.id }})">Close List</button>
         {% endif %}
     {% endif %}
 {% endblock %}
 
 {% block javascript %}
     <script type="text/javascript">
-        watchList(document.querySelector("#watch-list-listing"), {{ List.id }}, 'check')
+        watchList(document.querySelector("#watch-list-auction"), {{ auction.id }}, 'check')
     </script>
-    <link href="{% static 'auctions/list.css' %}?verson=1" rel="stylesheet">
+    <link href="{% static 'auctions/auction.css' %}?verson=1" rel="stylesheet">
 {% endblock %}

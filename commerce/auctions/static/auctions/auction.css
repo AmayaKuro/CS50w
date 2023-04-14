@@ -6,7 +6,7 @@
 .header div {
     display: block;
 }
-#list-img {
+#auction-img {
     max-height: 50vh;
 }
 
@@ -38,6 +38,6 @@ textarea {
     display: none;
 }
 
-#watch-list-listing {
+#watch-list-auction {
     position: relative;
 }

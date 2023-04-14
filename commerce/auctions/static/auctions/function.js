@@ -1,7 +1,3 @@
-function list_direct(e) {
-    console.log(e);
-}
-
 function closeList(list) {
     const data = {
         list: list,

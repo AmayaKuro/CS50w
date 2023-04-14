@@ -55,3 +55,27 @@ body {
     max-width: 50vw;
     overflow-wrap: break-word;
 }
+
+#category-holder {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    max-width: 80%;
+    margin: 1rem auto;
+    gap: 1rem 2rem;
+}
+
+#category-holder div {
+    margin: auto;
+    background-color: #ddd;
+    padding: .2rem .6rem;
+    border-radius: .3rem;
+}
+
+#category-holder div:hover {
+    background-color: #aaa;
+}
+
+#category-holder div a {
+    color: #111;
+    text-decoration: none;
+}

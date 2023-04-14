@@ -9,36 +9,36 @@
 {% block body %}
     <h2>Watch List</h2>
     <ul id="list">
-        {% for list in watchingList %}
+        {% for auction in auctions %}
             <li class="wrapper">
-                <a href="{% url "listing" id=list.id %}">
-                    {% if list.imageURL %}
+                <a href="{% url "auction" id=auction.id %}">
+                    {% if auction.imageURL %}
                         <div class="image-container">
-                            <img src="{{ list.imageURL }}">
+                            <img src="{{ auction.imageURL }}">
                         </div>
                     {% endif %}
                     <div class="content-container">
                         <div>
-                            <h2>{{ list.title }}</h2> 
+                            <h2>{{ auction.title }}</h2> 
                         </div>
                         <div>
-                            <strong>Price:</strong> ${{ list.price }}
+                            <strong>Price:</strong> ${{ auction.price }}
                         </div>
                         <div>
-                            {{ list.description }}
+                            {{ auction.description }}
                         </div>
                         <div style="color: #788;">
-                            <span>Created {{ list.createTime }}</span>
+                            <span>Created {{ auction.createTime }}</span>
                         </div>
                         <div>
-                            <strong>Status: </strong> {% if list.status %} Open {% else %} Closed {% endif %}
+                            <strong>Status: </strong> {% if auction.status %} Open {% else %} Closed {% endif %}
                         </div>
                     </div>
                 </a>
-                <button class="btn btn-danger watch-list" onclick="watchList(this, {{ list.id }}, 'change')">Watch List</button>
+                <button class="btn btn-danger watch-list" onclick="watchList(this, {{ auction.id }}, 'change')">Watch List</button>
             </li>
         {% empty %}
-        <div style="margin: 1rem;">Empty! Go add a <a href="/">List</a> to your Watch List</div>
+        <div style="margin: 1rem;">Empty! Go add an <a href="/">auction</a> to your Watch List</div>
         {% endfor %}
     </ul>
     {% csrf_token %}

@@ -5,7 +5,7 @@ from .models import *
 class items(forms.ModelForm):
     class Meta:
         model = auctionList
-        fields = ["title", "description", "price", "catagory", "imageURL"]
+        fields = ["title", "description", "price", "category", "imageURL"]
         widgets = {
             "description": forms.Textarea(attrs={"row": 5}),
         }

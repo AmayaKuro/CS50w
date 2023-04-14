@@ -9,10 +9,11 @@ class User(AbstractUser):
     
 
 class auctionList(models.Model):
+    # TODO: Force migrate to change category
     title = models.CharField(max_length=64)
     description = models.CharField(max_length=256)
     price = models.FloatField()
-    catagory = models.CharField(blank=True, null=True ,max_length=64)
+    category = models.CharField(blank=True,max_length=64)
     imageURL = models.URLField(blank=True, null=True)
     createTime = models.DateTimeField(auto_now_add=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owner")

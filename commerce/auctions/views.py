@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.db.models import Count
 
 
 import json
@@ -30,10 +31,10 @@ def CheckURLimage(url):
 
 
 def index(request):
-    auctions = auctionList.objects.values_list(
+    auctions = auctionList.objects.values(
         "id", "title", "imageURL", "price",
         "description", "createTime", "status",
-    ).order_by("-status").values()
+    ).order_by("-status")
 
     return render(request, "auctions/index.html", {
         "auctions": auctions
@@ -107,6 +108,9 @@ def create(request):
             except:
                 messages.error(request, "Invalid price")
 
+            if form.cleaned_data["category"] == "":
+                form.cleaned_data["category"] = "No Category"
+            
             if form.cleaned_data["imageURL"] == "":
                 pass
             elif not CheckURLimage(form.cleaned_data["imageURL"]):
@@ -132,9 +136,9 @@ def create(request):
 
 
 @login_required(login_url="login")
-def listing(request, id):
-    List = auctionList.objects.get(id=id)
-    commentList = comments.objects.filter(auctionList=List)
+def auction(request, id):
+    auction = auctionList.objects.get(id=id)
+    commentList = comments.objects.filter(auctionList=auction)
 
     if request.method == "POST":
         try:
@@ -142,24 +146,24 @@ def listing(request, id):
         except:
             messages.error(request, "Invalid bid!")
         else:
-            if bid > List.price:
-                List.price = bid
-                List.highestBidder = request.user
-                List.save()
+            if bid > auction.price:
+                auction.price = bid
+                auction.highestBidder = request.user
+                auction.save()
             else:
                 messages.error(
                     request, "Bid must be greater than previous bid!")
 
-        return HttpResponseRedirect(reverse("listing", kwargs={"id": id}))
+        return HttpResponseRedirect(reverse("auction", kwargs={"id": id}))
     else:
         commentBox = forms.comment()
 
-        owner = List.owner.username
-        highestBidder = List.highestBidder.username
+        owner = auction.owner.username
+        highestBidder = auction.highestBidder.username
 
         username = str(request.user)
-        return render(request, "auctions/listing.html", {
-            "List": List,
+        return render(request, "auctions/auction.html", {
+            "auction": auction,
             "owner": owner,
             "isOwner": owner == username,
             "isHighestBidder": highestBidder == username,
@@ -180,7 +184,7 @@ def commenting(request):
 
             comment.save()
 
-            return HttpResponseRedirect(reverse(listing, args=[request.POST["auctionList"]]))
+            return HttpResponseRedirect(reverse(auction, args=[request.POST["auctionList"]]))
     else:
         return HttpResponseRedirect("/")
 
@@ -201,15 +205,15 @@ def delete(request):
                 messages.error(request, "You don't have permission to do this action!")
         else:
             messages.error(request, "Invalid request!")
-    return HttpResponseRedirect(reverse(listing, args=[data["list"]]))
+    return HttpResponseRedirect(reverse(auction, args=[data["list"]]))
 
 
 @login_required(login_url="login")
 def watch_list(request):
-    watchingList = watchList.objects.get(user=request.user).watchList.all().order_by("-status")
+    auctions = watchList.objects.get(user=request.user).watchList.all().order_by("-status")
 
     return render(request, "auctions/watchlist.html", {
-        "watchingList": watchingList,
+        "auctions": auctions,
     })
         
 
@@ -249,4 +253,19 @@ def watchListModify(request):
 
 
 def categories(request):
-    pass
+    categories = (auctionList.objects.order_by().values('category').distinct())
+    
+    return render(request, "auctions/category.html", {
+        "categories": categories,
+    })
+
+
+def categoryFind(request, category):
+    categoryList = (auctionList.objects
+        .filter(category=category)
+        .values("id", "title", "imageURL", "price", "description", "createTime", "status",)
+        .order_by("-status")
+    )
+    return render(request, "auctions/category.html", {
+        "categoryList": categoryList,
+    })

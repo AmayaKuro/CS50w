@@ -1,0 +1,22 @@
+{% extends "auctions/layout.html" %}
+
+
+{% block title %}
+    Category
+{% endblock %}
+
+
+{% block body %}
+    <h2>Categories</h2>
+    {% if categories %}
+        <div id="category-holder">
+            {% for category in categories %}
+                <div>
+                     <a href="{% url "categoryFind" category=category.category %}">{{ category.category }}</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% elif categoryList %}
+        {% include "auctions/auctionList.html" with auctions=categoryList %}
+    {% endif %}
+{% endblock %}
