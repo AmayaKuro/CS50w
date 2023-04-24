@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
+  
+  // Add event listener
+  document.querySelector('#compose-form').addEventListener('submit', sendEmail);
 
   // By default, load the inbox
   load_mailbox('inbox');
@@ -34,6 +37,7 @@ function load_mailbox(mailbox) {
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 }
 
+
 async function sendEmail(e) {
   // Stop form from submitting
   e.preventDefault();
@@ -54,7 +58,6 @@ async function sendEmail(e) {
     body: JSON.stringify(email),
   });
   const data = await responne.json();
-
 
   // Pop up message respone to user 
   if ("error" in data) {
