@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
   load_mailbox('inbox');
 });
 
+
 function compose_email() {
 
   // Show compose view and hide other views
@@ -22,6 +23,7 @@ function compose_email() {
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
 }
+
 
 function load_mailbox(mailbox) {
 
@@ -63,18 +65,16 @@ async function sendEmail(e) {
     typeOfMessage("success", data.message);
     load_mailbox('sent');
   }
+}
 
 
-  function typeOfMessage(type, message) {
-    const popUp = document.querySelector("#popUp");
+function typeOfMessage(type, message) {
+  const popUp = document.querySelector("#popUp");
 
-    popUp.classList.remove("success", "error", "popUp");
-    console.log(type.search(" "))
-    setTimeout(function () { popUp.classList.add(type, "popUp");  }, 50);
+  popUp.classList.remove("success", "error", "popUp");
+  console.log(type.search(" "))
+  setTimeout(function () { popUp.classList.add(type, "popUp");  }, 50);
 
-    popUp.querySelector("strong").innerHTML = type.charAt(0).toUpperCase() + type.slice(1);
-    popUp.querySelector("p").innerHTML = message;
-
-  }
-
+  popUp.querySelector("strong").innerHTML = type.charAt(0).toUpperCase() + type.slice(1);
+  popUp.querySelector("p").innerHTML = message;
 }
