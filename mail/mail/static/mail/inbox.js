@@ -58,16 +58,16 @@ async function sendEmail(e) {
 
   // Pop up message respone to user 
   if ("error" in data) {
-    typeOfMessage("error", data.error);
+    PopUpMessage("error", data.error);
   }
   else if ("message" in data) {
-    typeOfMessage("success", data.message);
+    PopUpMessage("success", data.message);
     load_mailbox('sent');
   }
 }
 
 
-function typeOfMessage(type, message) {
+function PopUpMessage(type, message) {
   const popUp = document.querySelector("#popUp");
 
   popUp.classList.remove("success", "error", "popUp");
