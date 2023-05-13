@@ -2,6 +2,7 @@ textarea {
     min-height: 400px;
 }
 
+
 .holder {
     display: grid;
     grid-template-columns: 20% 20% 20% 20% 20%;
@@ -37,6 +38,69 @@ textarea {
     background-color: #ccc;
 }
 
+
+#info, #content {
+    position: relative;
+}
+
+#view-subject {
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    border-bottom: 2px solid #ccc;
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+}
+
+#view-sender, #view-reciptions, #view-body {
+    display: block;
+    min-height: 2rem;
+}
+
+#timestamp {
+    position: absolute;
+    right: 1rem;
+    color:#aaa;
+}
+
+#view-body {
+    margin: 1rem 0;
+    padding-bottom: 1rem;
+    white-space: pre-line;
+    border-bottom: 2px solid #ccc;
+}
+
+
+#archive {
+    grid-column: 5/5;
+    max-height: 2rem;
+    font-size: 1rem;
+    padding: 0.1rem 0.3rem 0.3rem 0.3rem;
+    justify-self: right;
+    align-self: center;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    border: 2px solid rgb(192, 192, 248) !important;
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+#archive.archived {
+    background-color: rgb(125, 125, 246);
+    color: aliceblue;
+}
+
+#archive:hover, #reply:hover {
+    box-shadow: 0 0 5px 2px blue;
+}
+
+#reply {
+    border-radius: 0.5rem;
+    padding: 0.4rem;
+    cursor: pointer;
+    border: 2px solid rgb(192, 192, 248);
+    transition: box-shadow 0.3s ease-in-out;
+}
+  
 #popUp {
     padding: 0.5rem .75rem;
     position: fixed;
