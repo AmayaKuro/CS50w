@@ -41,7 +41,6 @@ function compose_email(data) {
     fields.recipients.value = '';
     fields.subject.value = '';
     fields.body.value = '';
-    console.log(data, "reply" in data, data.mail.sender);
   }
 }
 
