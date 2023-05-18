@@ -3,8 +3,11 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_protect
 
-from .models import User
+import json
+
+from .models import User, Post, Comment
 
 
 def index(request):
@@ -61,3 +64,23 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+@csrf_protect
+def newPost(request):
+    if request.method == "PUT":
+        # Repair data
+        data = json.load(request)
+        user = User.objects.get(username=request.user)
+
+        post = Post.objects.create(content = data["content"], owner = user)
+        post.save()
+
+        # TODO: render posted post as the first post like fb
+        return HttpResponse("ok")
+
+
+def post(request):
+    if request.method == "POST":
+        data = json.load(request)
+        
+        posts = Post.objects.filter()
