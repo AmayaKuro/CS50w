@@ -6,6 +6,10 @@ body {
 
 #navbar {
     border-bottom: 1px solid rgb(123, 124, 125);
+    position: sticky;
+    top: 0px;
+    backdrop-filter: blur(10px);
+    transition: top 0.3s;
 }
 
 #navbar .nav-link {
@@ -22,9 +26,10 @@ body {
 /* TODO: make header transparent and navbar hide on scroll down */
 #header {
     padding: 1rem;
+    width: 100%;
     position: sticky;
-    background-color:rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
+    transition: top 0.3s;
 }
 
 #main {
@@ -69,7 +74,6 @@ input::-ms-input-placeholder {
 #new-post input {
     display: block;
     margin: 1rem 0 1rem auto;
-    
 }
 
 #new-content {
