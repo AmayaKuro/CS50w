@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect
+from django.http import JsonResponse
 
 import json
 
@@ -78,9 +79,25 @@ def newPost(request):
         # TODO: render posted post as the first post like fb
         return HttpResponse("ok")
 
-
-def post(request):
+@csrf_protect
+def posts(request):
     if request.method == "POST":
+        # TODO: send 20 post to client on request
         data = json.load(request)
+
+        # Get posts order by 
+        posts = Post.objects.order_by("timeStamp")[data["postIndex"]: data["postIndex"] + 10]
         
-        posts = Post.objects.filter()
+        respone = {
+            "posts": [post.serialize() for post in posts],
+            "outOfPosts": len(posts) != 10,
+        }
+
+        return JsonResponse(respone, safe=False)
+    
+# TODO: this for later
+@csrf_protect
+def like(request):
+    pass
+#     if request.method == "POST":
+#         post = Post.object
