@@ -23,7 +23,7 @@ body {
     background-color: rgb(70, 81, 84);
 }
 
-/* TODO: make header transparent and navbar hide on scroll down */
+
 #header {
     padding: 1rem;
     width: 100%;
@@ -37,11 +37,6 @@ body {
     width: 90%;
 }
 
-.post-item {
-    border: 1px solid rgb(123, 124, 125);
-    border-radius: .3rem;
-    padding: 0.5rem;
-}
 
 input:not([type="submit"]), textarea {
     background-color: rgb(82, 86, 91);
@@ -56,10 +51,18 @@ input::-ms-input-placeholder {
     color: rgb(186, 188, 190);
 }
 
+
+.post-item {
+    border: 1px solid rgb(123, 124, 125);
+    border-radius: .3rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+
 #new-post-holder p {
     font-weight: bold;
     font-size: large;
-    margin: 1rem;
 }
 
 #new-post {
@@ -73,10 +76,19 @@ input::-ms-input-placeholder {
 
 #new-post input {
     display: block;
-    margin: 1rem 0 1rem auto;
+    margin: 1rem 0 0 auto;
 }
 
 #new-content {
     width: -webkit-fill-available;
     border-radius: .3rem;
+}
+
+.owner {
+    margin-right: 1.5rem;
+    font-weight: 500;
+}
+
+.time-stamp {
+    color: #788;
 }
