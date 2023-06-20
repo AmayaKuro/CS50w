@@ -25,7 +25,7 @@ body {
 
 
 #header {
-    padding: 1rem;
+    padding: 2rem;
     width: 100%;
     position: sticky;
     backdrop-filter: blur(10px);
@@ -70,25 +70,30 @@ input::-ms-input-placeholder {
     width: 90%;
 }
 
-#new-content {
-    padding: .5rem;
-}
-
 #new-post input {
     display: block;
     margin: 1rem 0 0 auto;
 }
 
-#new-content {
+#new-post-content {
     width: -webkit-fill-available;
     border-radius: .3rem;
+    padding: .5rem;
+}
+
+.title a:hover {
+    text-decoration: none !important;
 }
 
 .owner {
     margin-right: 1.5rem;
     font-weight: 500;
+    color: rgb(214, 217, 219);
 }
+
+
 
 .time-stamp {
     color: #788;
 }
+
