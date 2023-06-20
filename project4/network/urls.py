@@ -1,16 +1,16 @@
 
-from django.urls import path
+from django.urls import path, re_path, include
 
 from . import views
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    # API paths
+    path("api/", include("network.api")),
+        
+    # Application paths
     path("login", views.login_view, name="login"),
     path("logout", views.logout_view, name="logout"),
     path("register", views.register, name="register"),
-
-    # API url
-    path("newpost", views.newPost, name="newPost"),
-    path("post", views.posts, name="post"),
-    path("like", views.like, name="like"),
+    path("/", views.index, name="index"),  
+    path("/profile/:name", views.index, name="index"),  
 ]

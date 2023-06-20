@@ -4,7 +4,21 @@ import datetime
 
 
 class User(AbstractUser):
-    pass
+    follower = models.ManyToManyField("self")
+    following = models.ManyToManyField("self")
+
+    # TODO: Test this clean method
+    def clean(self):
+        # Check if the entry is already in related_entries
+        if self in self.following.all():
+            raise models.RestrictedError("Cannot add self to related_entries.")
+
+    def serialize(self):
+        return {
+            "username": self.username,
+            "follower": self.follower.count(),
+            "following": self.following.count(),
+        }
 
 class Post(models.Model):
     content = models.TextField()
