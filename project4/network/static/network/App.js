@@ -1,19 +1,15 @@
-const header = ReactDOM.createRoot(document.querySelector("#header"));
-header.render(<Header header="All Post" />)
-
-const root = ReactDOM.createRoot(document.querySelector("#main"));
-
-root.render(<AllPost />)
+const root = ReactDOM.createRoot(document.querySelector("#container"));
+root.render(<AllPost />);
 
 
-// TODO: fetch post
-// TODO: Render fetched post
 function AllPost() {
     return (
         <div>
-            {/* <Header header="All Post" /> */}
-            <NewPost />
-            <Posts />
+            <Header header="All Post" />
+            <div id="main">
+                <NewPost />
+                <Posts />
+            </div>
         </div>
     );
 }
@@ -25,6 +21,9 @@ function Header(props) {
             <b>
                 {props.header.toUpperCase()}
             </b>
+            <div style={{ marginRight: "auto" }}>
+                <TestAPI />
+            </div>
         </div>
     );
 };
@@ -41,7 +40,7 @@ function NewPost() {
         };
 
         // Send post to server
-        const responne = await fetch("/newpost", {
+        const responne = await fetch("/api/newpost", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -50,6 +49,7 @@ function NewPost() {
             body: JSON.stringify(post),
         });
         const data = await responne.json();
+
         data.timeStamp = new Date(data.timeStamp * 1000);
     }
 
@@ -57,51 +57,54 @@ function NewPost() {
         <div className="post-item" id="new-post-holder">
             <p>New Post</p>
             <form id="new-post" onSubmit={handleNewPost}>
-                <textarea autoComplete="off" id="new-content" name="post" placeholder="Create new post"></textarea>
+                <textarea autoComplete="off" id="new-post-content" name="post" placeholder="Create new post"></textarea>
                 <input type="submit"></input>
             </form>
         </div>
     );
 }
 
-
+// TODO: make this avaible for other's use
 function Posts() {
     const [posts, morePosts] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
     const [hasMore, setHasMore] = React.useState(true);
-    const currentPostIndex = React.useRef(1);
+    const currentPostIndex = React.useRef(0);
 
+
+    const debug = React.useCallback(() => {
+        console.log("Call back || Loading: ", loading);
+    }, [loading]);
 
     // Request post from server
     const display = React.useCallback(async () => {
+        // TODO: Update this buy-time mechanic (Current problem: loading always 
+        // false even when currenPostIndex and hasMore had not been update)
 
-        // TODO: Update this buy-time mechanic
         // Begin fetching request
-        if (hasMore) {
-            setLoading(true);
-            const responne = await fetch("/post", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-                },
-                body: JSON.stringify({ postIndex: currentPostIndex.current }),
-            });
-            const data = await responne.json();
+        setLoading(true);
+        const responne = await fetch("/api/post", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            },
+            body: JSON.stringify({ postIndex: currentPostIndex.current }),
+        });
 
-            morePosts(pevPosts => [...pevPosts, ...data.posts]);
+        const data = await responne.json();
 
-            if (data.outOfPosts) {
-                setHasMore(false);
-            }
+        morePosts(pevPosts => [...pevPosts, ...data.posts]);
+        currentPostIndex.current += 10;
+        setHasMore(!data.outOfPosts);
+        setLoading(false);
 
-            currentPostIndex.current = currentPostIndex.current + 10;
+    }, [currentPostIndex]);
 
-            // End fetching request
-            setLoading(false);
-        }
 
-    }, [currentPostIndex, hasMore]);
+    React.useEffect(() => {
+        display();
+    }, []);
 
     React.useEffect(() => {
         const onScroll = () => {
@@ -110,26 +113,22 @@ function Posts() {
             }
 
             // If user scroll to the end of page, fetch more posts
-            if (window.innerHeight + window.pageYOffset >= document.body.scrollHeight - 200) {
+            if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 200) {
                 display();
             }
         }
-
         // clean up code
         window.addEventListener('scroll', onScroll, { passive: true });
 
         return () => window.removeEventListener('scroll', onScroll);
-    }, [loading, hasMore]);
+    }, [loading, hasMore, display]);
 
-    React.useEffect(() => {
-        display();
-    }, []);
 
     return (
         // TODO: keep render new element but not re-render causing page resetting? 
         <div>
             {posts.map((post) => (
-                <SinglePost post={post} key={post.id} />
+                <SinglePost post={post} pid={post.id} key={post.id} />
             ))}
         </div>
     );
@@ -167,8 +166,10 @@ function SinglePost(props) {
     return (
         <div className="post-item">
             <span className="title">
-                <span className="owner">{props.post.owner}</span>
-                <span className="time-stamp">{date}</span>
+                <Link to={`/profile/${props.post.owner}`}>
+                    <span className="owner">{props.post.owner}</span>
+                </Link>
+                <span className="time-stamp">{date} {props.pid}</span>
             </span>
             <div className="content">{props.post.content}</div>
             <div className="likes">
@@ -178,4 +179,28 @@ function SinglePost(props) {
             <div className="comment"></div>
         </div>
     );
+}
+
+
+function TestAPI() {
+    const [posts, morePosts] = React.useState([]);
+    const [loading, setLoading] = React.useState(false);
+    const [hasMore, setHasMore] = React.useState(true);
+    const currentPostIndex = React.useRef(1);
+
+    async function test() {
+        const responne = await fetch("/api/profile", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            },
+            body: JSON.stringify({ postIndex: currentPostIndex.current }),
+        });
+        const data = await responne.json();
+        console.log(data);
+    }
+    return (
+        <div onClick={test}>testAPI</div>
+    )
 }

@@ -77,24 +77,45 @@ def newPost(request):
         post.save()
 
         # TODO: render posted post as the first post like fb
-        return HttpResponse("ok")
+        return JsonResponse({"timeStamp": post.timeStamp.timestamp()}, safe=False)
 
 @csrf_protect
 def posts(request):
     if request.method == "POST":
-        # TODO: send 20 post to client on request
         data = json.load(request)
 
-        # Get posts order by 
-        posts = Post.objects.order_by("timeStamp")[data["postIndex"]: data["postIndex"] + 10]
+        # Get posts in reverse chronological order
+        posts = Post.objects.order_by("-timeStamp")[data["postIndex"]: data["postIndex"] + 10]
         
+        # Build API content
         respone = {
             "posts": [post.serialize() for post in posts],
             "outOfPosts": len(posts) != 10,
         }
 
         return JsonResponse(respone, safe=False)
-    
+
+
+@csrf_protect
+def profile(request):
+    if request.method == "GET":
+        data = json.load(request)
+
+        # Get target's posts 
+        userInfo = User.objects.get(username=request.user)
+        posts = Post.objects.filter(owner=request.user).order_by("-timeStamp")[data["postIndex"]: data["postIndex"] + 10]
+
+
+        # TODO: optimize this DB query;
+        respone = {
+            "userInfo": userInfo.serialize(),
+            "posts": [post.serialize() for post in posts],
+            "outOfPosts": len(posts) < 10,
+        }
+
+        return JsonResponse(respone, safe=False)
+
+
 # TODO: this for later
 @csrf_protect
 def like(request):
