@@ -1,17 +1,51 @@
 const root = ReactDOM.createRoot(document.querySelector("#container"));
-root.render(<AllPost />);
+root.render(<App />);
 
 
-function AllPost() {
-    return (
-        <div>
-            <Header header="All Post" />
-            <div id="main">
-                <NewPost />
-                <Posts />
-            </div>
-        </div>
-    );
+function App() {
+    var currentPath = window.location.pathname.split("/");
+    var header = currentPath[1];
+
+    switch (header) {
+        case "":
+            return (
+                <div>
+                    <Header header="All Post" />
+                    <div id="main">
+                        <NewPost />
+                        <Posts path="post" />
+                    </div>
+                </div>
+            );
+
+        case "profile":
+            let user = currentPath[2];
+
+            return (
+                <div>
+                    <Header header={header} />
+                    <div id="main">
+                        <UserHeader user={user} />
+                        <Posts path="profile" user={user} />
+                    </div>
+                </div>
+            );
+
+        case "following":
+            return (
+                <div>
+                    <Header header={header} />
+                    <div id="main">
+                        <Posts path="following" />
+                    </div>
+                </div>
+            );
+
+        default:
+            break;
+    }
+
+
 }
 
 
@@ -64,17 +98,43 @@ function NewPost() {
     );
 }
 
+
+function UserHeader(props) {
+    const [userInfo, setInfo] = React.useState({});
+    React.useEffect(() => {
+      const header = async () => {
+            const responne = await fetch(`/api/userinfo/${props.user}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+                },
+            })
+            const data = await responne.json();
+            setInfo(data.userInfo);
+        }
+        header();
+    }, []);
+
+    return (
+        <div id="user-header">
+            <b>{userInfo.username}</b>
+            <span>Follower: {userInfo.follower}</span>
+            <span>Following: {userInfo.following}</span>
+        </div>
+    );
+}
+
+
 // TODO: make this avaible for other's use
-function Posts() {
+function Posts({ path, user }) {
     const [posts, morePosts] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
     const [hasMore, setHasMore] = React.useState(true);
     const currentPostIndex = React.useRef(0);
 
-
-    const debug = React.useCallback(() => {
-        console.log("Call back || Loading: ", loading);
-    }, [loading]);
+    // Process props for fetching
+    const fullPath = [path, user].filter(Boolean).join("/");
 
     // Request post from server
     const display = React.useCallback(async () => {
@@ -83,13 +143,12 @@ function Posts() {
 
         // Begin fetching request
         setLoading(true);
-        const responne = await fetch("/api/post", {
-            method: "POST",
+        const responne = await fetch(`/api/${fullPath}/${currentPostIndex.current}`, {
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
             },
-            body: JSON.stringify({ postIndex: currentPostIndex.current }),
         });
 
         const data = await responne.json();
@@ -134,7 +193,6 @@ function Posts() {
     );
 }
 
-
 function SinglePost(props) {
     // TODO: manange like button (later)
     // const [likeState, changeLikeStage] = React.useState(props.post.likes);
@@ -166,9 +224,9 @@ function SinglePost(props) {
     return (
         <div className="post-item">
             <span className="title">
-                <Link to={`/profile/${props.post.owner}`}>
+                <a href={`/profile/${props.post.owner}`}>
                     <span className="owner">{props.post.owner}</span>
-                </Link>
+                </a>
                 <span className="time-stamp">{date} {props.pid}</span>
             </span>
             <div className="content">{props.post.content}</div>
@@ -182,25 +240,20 @@ function SinglePost(props) {
 }
 
 
+// TODO: turn this to general use fetch (change url to var)
 function TestAPI() {
-    const [posts, morePosts] = React.useState([]);
-    const [loading, setLoading] = React.useState(false);
-    const [hasMore, setHasMore] = React.useState(true);
-    const currentPostIndex = React.useRef(1);
-
-    async function test() {
-        const responne = await fetch("/api/profile", {
-            method: "POST",
+    const a = async function request() {
+        const responne = await fetch("/api/profile/2/2", {
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
             },
-            body: JSON.stringify({ postIndex: currentPostIndex.current }),
         });
         const data = await responne.json();
         console.log(data);
     }
     return (
-        <div onClick={test}>testAPI</div>
-    )
+        <div onClick={a}>testAPI</div>
+    );
 }

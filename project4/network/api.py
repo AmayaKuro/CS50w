@@ -3,8 +3,9 @@ from django.urls import path, re_path, include
 from . import views
 
 urlpatterns = [
-    path("newpost", views.newPost, name="newPost"),
-    path("post", views.posts, name="post"),
-    path("like", views.like, name="like"),
-    path("profile", views.profile, name="profile"),
+    path("newpost", views.newPost),
+    path("post/<int:currentPost>", views.posts),
+    path("like", views.like),
+    path("userinfo/<str:user>", views.userInfo),
+    path("profile/<str:user>/<int:currentPost>", views.profile),
 ]
