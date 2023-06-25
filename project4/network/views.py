@@ -98,7 +98,7 @@ def posts(request, currentPost):
 
 
 @csrf_protect
-def profile(request, user, currentPost):
+def profilePost(request, user, currentPost):
     if request.method == "GET":
         # Get target's posts
         posts = Post.objects.filter(owner=user).order_by(
@@ -115,16 +115,44 @@ def profile(request, user, currentPost):
 @csrf_protect
 def userInfo(request, user):
     if request.method == "GET":
-        # Get posts in reverse chronological order
-        user = User.objects.get(username=user)
+        # Get user info and check if user viewing their own profile
+        requestedUser = User.objects.get(username=user)
+
+        if request.user == requestedUser:
+            owner = True
+
+        # Check if user is following the requested user
+        elif request.user.is_authenticated and user in requestedUser.follower.all():
+            owner = False
+            isFollowing = True
+        else:
+            owner = False
+            isFollowing = False
 
         # Build API content
         respone = {
-            "userInfo": user.serialize(),
+            "userInfo": requestedUser.serialize(),
+            "owner": owner,
         }
+        if not owner:
+            respone["isFollowing"] = isFollowing
 
         return JsonResponse(respone, safe=False)
 
+
+@csrf_protect
+def follow(request, user):
+    if request.method == "PUT":
+        requestedUser = User.objects.get(username=user)
+
+        # Follow the requested user if not already following and vice versa
+        if request.user in requestedUser.follower.all():
+            requestedUser.follower.remove(request.user)
+        else:
+            requestedUser.follower.add(request.user)
+
+        requestedUser.save()
+        return JsonResponse("done", safe=False)
 
 # TODO: this for later
 @csrf_protect

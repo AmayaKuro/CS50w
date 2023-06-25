@@ -101,6 +101,9 @@ function NewPost() {
 
 function UserHeader(props) {
     const [userInfo, setInfo] = React.useState({});
+    const [isOwner, setOwner] = React.useState(false);
+    const [followState, setFollowState] = React.useState(false);
+    console.log(followState)
     React.useEffect(() => {
       const header = async () => {
             const responne = await fetch(`/api/userinfo/${props.user}`, {
@@ -112,15 +115,30 @@ function UserHeader(props) {
             })
             const data = await responne.json();
             setInfo(data.userInfo);
+            setOwner(data.owner);
+            setFollowState(data.isFollowing);
         }
         header();
     }, []);
+
+    const follow = React.useCallback(async () => {
+        fetch(`/api/follow/${props.user}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            },
+        })
+        setFollowState(followState => !followState);
+    }, []);
+
 
     return (
         <div id="user-header">
             <b>{userInfo.username}</b>
             <span>Follower: {userInfo.follower}</span>
             <span>Following: {userInfo.following}</span>
+            {!isOwner ?  <div className={followState.toString()} id="follow-btn" onClick={follow}>{followState ? "Followed" : "Follow"}</div> : null}
         </div>
     );
 }
