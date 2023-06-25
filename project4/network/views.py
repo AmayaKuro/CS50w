@@ -142,17 +142,20 @@ def userInfo(request, user):
 
 @csrf_protect
 def follow(request, user):
-    if request.method == "PUT":
-        requestedUser = User.objects.get(username=user)
+    if request.user.is_authenticated:
+        if request.method == "PUT":
+            requestedUser = User.objects.get(username=user)
 
-        # Follow the requested user if not already following and vice versa
-        if request.user in requestedUser.follower.all():
-            requestedUser.follower.remove(request.user)
-        else:
-            requestedUser.follower.add(request.user)
+            # Follow the requested user if not already following and vice versa
+            if request.user in requestedUser.follower.all():
+                requestedUser.follower.remove(request.user)
+            else:
+                requestedUser.follower.add(request.user)
 
-        requestedUser.save()
+            requestedUser.save()
         return JsonResponse("done", safe=False)
+    else:
+        return JsonResponse("error", safe=False)
 
 # TODO: this for later
 @csrf_protect
