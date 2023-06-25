@@ -103,9 +103,10 @@ function UserHeader(props) {
     const [userInfo, setInfo] = React.useState({});
     const [isOwner, setOwner] = React.useState(false);
     const [followState, setFollowState] = React.useState(false);
+    const [disable, setDisable] = React.useState(false);
     console.log(followState)
     React.useEffect(() => {
-      const header = async () => {
+        const header = async () => {
             const responne = await fetch(`/api/userinfo/${props.user}`, {
                 method: "GET",
                 headers: {
@@ -122,13 +123,15 @@ function UserHeader(props) {
     }, []);
 
     const follow = React.useCallback(async () => {
-        fetch(`/api/follow/${props.user}`, {
+        const respone = await fetch(`/api/follow/${props.user}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
             },
         })
+        const data = await respone.json();
+        setDisable(data === "error" ? true : false);
         setFollowState(followState => !followState);
     }, []);
 
@@ -138,7 +141,7 @@ function UserHeader(props) {
             <b>{userInfo.username}</b>
             <span>Follower: {userInfo.follower}</span>
             <span>Following: {userInfo.following}</span>
-            {!isOwner ?  <div className={followState.toString()} id="follow-btn" onClick={follow}>{followState ? "Followed" : "Follow"}</div> : null}
+            {(!isOwner && !disable) ? <div className={followState.toString()} id="follow-btn" onClick={follow}>{followState ? "Followed" : "Follow"}</div> : null}
         </div>
     );
 }
