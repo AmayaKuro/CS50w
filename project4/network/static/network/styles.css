@@ -99,7 +99,29 @@ input::-ms-input-placeholder {
 #user-header {
     display: flex;
     justify-content: space-around;
+    align-items: center;
     padding: 1rem 0;
     margin-bottom: 1rem;
     border-bottom: 1px solid rgb(123, 124, 125);
+}
+
+#follow-btn {
+    border-radius: 1rem;
+    padding: .5rem 1rem;
+    border: 1px solid rgb(123, 124, 125);
+} 
+
+#follow-btn:hover {
+    cursor: pointer;
+}
+
+#follow-btn.true {
+    background-color: rgb(214, 217, 219);
+    color: rgb(82, 86, 91);
+}
+
+#follow-btn.false {
+    background-color: rgb(21, 21, 21);
+    border: 1px solid rgb(214, 217, 219);
+    color: rgb(214, 217, 219);
 }
