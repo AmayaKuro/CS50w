@@ -84,7 +84,7 @@ input::-ms-input-placeholder {
     width: 90%;
 }
 
-#new-post input {
+#new-post input, .edit-submit {
     display: block;
     margin: 1rem 0 0 auto;
 }

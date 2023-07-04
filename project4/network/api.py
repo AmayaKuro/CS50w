@@ -9,4 +9,5 @@ urlpatterns = [
     path("userinfo/<str:user>", views.userInfo),
     path("profile/<str:user>/<int:currentPost>", views.profilePost),
     path("follow/<str:user>", views.follow),
+    path("editpost/<int:postId>", views.editPost),
 ]
