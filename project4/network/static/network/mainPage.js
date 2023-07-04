@@ -218,24 +218,6 @@ function SinglePost(props) {
     const [editState, setEditState] = React.useState(false);
     const [currentContent, setCurrentContent] = React.useState(props.post.content);
 
-    // NOTE: may pass edit func from parent props or pass props 
-    // to child and create edit func in child
-
-    // TODO: manange like button (later)
-    // const [likeState, changeLikeStage] = React.useState(props.post.likes);
-
-    // async function like() {
-    //     let respone = await fetch("/like", {
-    //         method: "POST",
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
-    //         },
-    //     })
-    //     let data = respone.json();
-    //     console.log(respone);
-    // }
-
     var options = {
         hour12: true,
         hour: "numeric",
@@ -248,6 +230,7 @@ function SinglePost(props) {
     let date = new Date(props.post.timeStamp * 1000);
     date = date.toLocaleDateString("en-US", options);
 
+
     return (
         <div className="post-item">
             <span className="title">
@@ -255,15 +238,34 @@ function SinglePost(props) {
                     <span className="owner">{props.post.owner}</span>
                 </a>
                 <span className="time-stamp">{date} {props.pid}</span>
-                {props.ownerShip ? <div onClick={() => setEditState(per => !per)}>click</div> : null}
+                {props.ownerShip ?
+                    <div className={`edit-btn ${editState ? "editing" : ""}`} onClick={() => setEditState(per => !per)}>
+                        <span>&#9998;</span>
+                    </div>
+                    : null
+                }
             </span>
-            {editState ? <EditPost id={props.post.id} content={currentContent} handleState={{setEditState: setEditState, setCurrentContent: setCurrentContent}} />
+            {editState ? <EditPost id={props.post.id} content={currentContent} handleState={{ setEditState: setEditState, setCurrentContent: setCurrentContent }} />
                 : <DisplayPost post={props.post} currentContent={currentContent} />}
         </div>
     );
 }
 
 function DisplayPost(props) {
+    // TODO: manange like button (later)
+    const [likeState, changeLikeStage] = React.useState(props.post.likes);
+
+    async function like() {
+        let respone = await fetch("/like", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            },
+        })
+        let data = respone.json();
+        console.log(respone);
+    }
     return (
         <div>
             <div className="content">{props.currentContent}</div>
@@ -276,7 +278,7 @@ function DisplayPost(props) {
 }
 
 function EditPost(props) {
-    const [content, setContent] = React.useState(props.content);
+    const content = React.useRef(null);
     const editPost = React.useCallback(async () => {
         const responne = await fetch(`/api/editpost/${props.id}`, {
             method: "PATCH",
@@ -284,16 +286,39 @@ function EditPost(props) {
                 "Content-Type": "application/json",
                 "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
             },
-            body: JSON.stringify({ content: content }),
+            body: JSON.stringify({ content: content.current.textContent }),
         });
         const data = await responne.json();
         props.handleState.setCurrentContent(data.post.content);
         props.handleState.setEditState(false);
     }, [content]);
 
+    // Place cursor at the end of content when open edit mode || may change to useref
+    React.useEffect(() => {
+        var el = content.current;
+        var range = document.createRange();
+        var sel = window.getSelection();
+
+        range.setStart(el.childNodes[0], el.childNodes[0].length);
+        range.collapse(true);
+
+        sel.removeAllRanges();
+        sel.addRange(range);
+
+        el.focus();
+    }, [content]);
+
+
     return (
         <div>
-            <div className="content" onBlur={event => setContent(event.target.textContent)} contentEditable>{content}</div>
+            <div className="content"
+                ref={content}
+                suppressContentEditableWarning={true}
+                contentEditable
+                autoFocus={true}
+            >
+                {props.content}
+            </div>
             <input className="edit-submit" type="submit" onClick={editPost}></input>
         </div>
     )
