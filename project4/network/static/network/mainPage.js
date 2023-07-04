@@ -215,9 +215,6 @@ function Posts({ path, user }) {
 }
 
 function SinglePost(props) {
-    // TODO: add EDIT state and EDIT button
-    // click edit button to change to edit state
-    // click edit button again to turn off edit state
     const [editState, setEditState] = React.useState(false);
     const [currentContent, setCurrentContent] = React.useState(props.post.content);
 
@@ -278,9 +275,6 @@ function DisplayPost(props) {
     )
 }
 
-// TODO: pass content to fetch body
-// TODO: request server to return only content of the post
-// via accept header
 function EditPost(props) {
     const [content, setContent] = React.useState(props.content);
     const editPost = React.useCallback(async () => {
