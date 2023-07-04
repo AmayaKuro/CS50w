@@ -69,8 +69,7 @@ def register(request):
 
 @csrf_protect
 def newPost(request):
-    if request.method == "PUT":
-        # Repair data
+    if request.method == "POST":
         data = json.load(request)
         user = User.objects.get(username=request.user)
 
@@ -88,9 +87,15 @@ def posts(request, currentPost):
         posts = Post.objects.order_by(
             "-timeStamp")[currentPost: currentPost + 10]
 
+        packet = []
+        for post in posts:
+            ownerShip = post.owner == request.user
+            post = post.serialize()
+            packet += [{"post": post, "ownerShip": ownerShip}]
+
         # Build API content
         respone = {
-            "posts": [post.serialize() for post in posts],
+            "posts": packet,
             "outOfPosts": len(posts) != 10,
         }
 
@@ -104,8 +109,14 @@ def profilePost(request, user, currentPost):
         posts = Post.objects.filter(owner=user).order_by(
             "-timeStamp")[currentPost: currentPost + 10]
 
+        packet = []
+        for post in posts:
+            ownerShip = post.owner == request.user
+            post = post.serialize()
+            packet += [{"post": post, "ownerShip": ownerShip}]
+
         respone = {
-            "posts": [post.serialize() for post in posts],
+            "posts": packet,
             "outOfPosts": len(posts) < 10,
         }
 
@@ -163,3 +174,20 @@ def like(request):
     pass
 #     if request.method == "POST":
 #         post = Post.object
+
+
+@csrf_protect
+def editPost(request, postId):
+    if request.method == "PATCH":
+        data = json.load(request)
+
+        post = Post.objects.get(id=postId)
+        if request.user != post.owner:
+            return JsonResponse({"errors": "Authencated Failed"}, status=403, safe=False)
+            
+        post.content = data["content"]
+        post.save()
+
+        # TODO: render posted post as the first post like fb
+        return JsonResponse({"post": post.serialize()}, safe=False)
+    

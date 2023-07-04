@@ -75,7 +75,7 @@ function NewPost() {
 
         // Send post to server
         const responne = await fetch("/api/newpost", {
-            method: "PUT",
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
@@ -104,7 +104,7 @@ function UserHeader(props) {
     const [isOwner, setOwner] = React.useState(false);
     const [followState, setFollowState] = React.useState(false);
     const [disable, setDisable] = React.useState(false);
-    console.log(followState)
+
     React.useEffect(() => {
         const header = async () => {
             const responne = await fetch(`/api/userinfo/${props.user}`, {
@@ -208,13 +208,22 @@ function Posts({ path, user }) {
         // TODO: keep render new element but not re-render causing page resetting? 
         <div>
             {posts.map((post) => (
-                <SinglePost post={post} pid={post.id} key={post.id} />
+                <SinglePost post={post.post} pid={post.post.id} key={post.post.id} ownerShip={post.ownerShip} />
             ))}
         </div>
     );
 }
 
 function SinglePost(props) {
+    // TODO: add EDIT state and EDIT button
+    // click edit button to change to edit state
+    // click edit button again to turn off edit state
+    const [editState, setEditState] = React.useState(false);
+    const [currentContent, setCurrentContent] = React.useState(props.post.content);
+
+    // NOTE: may pass edit func from parent props or pass props 
+    // to child and create edit func in child
+
     // TODO: manange like button (later)
     // const [likeState, changeLikeStage] = React.useState(props.post.likes);
 
@@ -249,27 +258,64 @@ function SinglePost(props) {
                     <span className="owner">{props.post.owner}</span>
                 </a>
                 <span className="time-stamp">{date} {props.pid}</span>
+                {props.ownerShip ? <div onClick={() => setEditState(per => !per)}>click</div> : null}
             </span>
-            <div className="content">{props.post.content}</div>
+            {editState ? <EditPost id={props.post.id} content={currentContent} handleState={{setEditState: setEditState, setCurrentContent: setCurrentContent}} />
+                : <DisplayPost post={props.post} currentContent={currentContent} />}
+        </div>
+    );
+}
+
+function DisplayPost(props) {
+    return (
+        <div>
+            <div className="content">{props.currentContent}</div>
             <div className="likes">
                 <i style={{ fontSize: "24px", color: "red", marginRight: "0.5rem" }}>&#9829;</i>
                 {props.post.likes}
             </div>
-            <div className="comment"></div>
         </div>
-    );
+    )
+}
+
+// TODO: pass content to fetch body
+// TODO: request server to return only content of the post
+// via accept header
+function EditPost(props) {
+    const [content, setContent] = React.useState(props.content);
+    const editPost = React.useCallback(async () => {
+        const responne = await fetch(`/api/editpost/${props.id}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+            },
+            body: JSON.stringify({ content: content }),
+        });
+        const data = await responne.json();
+        props.handleState.setCurrentContent(data.post.content);
+        props.handleState.setEditState(false);
+    }, [content]);
+
+    return (
+        <div>
+            <div className="content" onBlur={event => setContent(event.target.textContent)} contentEditable>{content}</div>
+            <input className="edit-submit" type="submit" onClick={editPost}></input>
+        </div>
+    )
 }
 
 
 // TODO: turn this to general use fetch (change url to var)
 function TestAPI() {
     const a = async function request() {
-        const responne = await fetch("/api/profile/2/2", {
-            method: "GET",
+        const responne = await fetch("/api/editpost/59", {
+            method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
             },
+            body: JSON.stringify({ content: "lmao" }),
         });
         const data = await responne.json();
         console.log(data);
