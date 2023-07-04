@@ -45,8 +45,26 @@ body {
     margin-bottom: 1rem;
 }
 
+.title {
+    display: grid;
+    grid-template-columns:  10% auto 10%;
+    margin-bottom: .5rem;
+    align-items: center;
+}
+
 .title a:hover {
     text-decoration: none !important;
+}
+
+.edit-btn {
+    padding: .3rem .5rem;
+    border-radius: .3rem;
+    justify-self: center;
+    cursor: pointer;
+}
+
+.edit-btn.editing {
+    background-color:#788;
 }
 
 .owner {
