@@ -8,7 +8,7 @@ from django.http import JsonResponse
 
 import json
 
-from .models import User, Post, Comment
+from .models import User, Post
 
 
 def index(request):
@@ -155,13 +155,16 @@ def userInfo(request, user):
 def follow(request, user):
     if request.user.is_authenticated:
         if request.method == "PUT":
-            requestedUser = User.objects.get(username=user)
+            requestedUser = User.objects.get(username=request.user)
+            userToFollow = User.objects.get(username=user)
 
             # Follow the requested user if not already following and vice versa
-            if request.user in requestedUser.follower.all():
-                requestedUser.follower.remove(request.user)
+            if requestedUser in requestedUser.follower.all():
+                userToFollow.follower.remove(requestedUser)
+                requestedUser.following.remove(userToFollow)
             else:
-                requestedUser.follower.add(request.user)
+                userToFollow.follower.add(requestedUser)
+                requestedUser.following.add(userToFollow)
 
             requestedUser.save()
         return JsonResponse("done", safe=False)
