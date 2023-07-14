@@ -69,15 +69,17 @@ def register(request):
 
 @csrf_protect
 def newPost(request):
-    if request.method == "POST":
-        data = json.load(request)
-        user = User.objects.get(username=request.user)
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            data = json.load(request)
+            user = User.objects.get(username=request.user)
 
-        post = Post.objects.create(content=data["content"], owner=user)
-        post.save()
+            post = Post.objects.create(content=data["content"], owner=user)
+            post.save()
 
-        # TODO: render posted post as the first post like fb
-        return JsonResponse({"timeStamp": post.timeStamp.timestamp()}, safe=False)
+            # TODO: render posted post as the first post like fb
+            return JsonResponse({"timeStamp": post.timeStamp.timestamp()}, safe=False)
+    return JsonResponse("User must log in to do that!", status=403, safe=False)
 
 
 @csrf_protect
@@ -90,8 +92,16 @@ def posts(request, currentPost):
         packet = []
         for post in posts:
             ownerShip = post.owner == request.user
-            post = post.serialize()
-            packet += [{"post": post, "ownerShip": ownerShip}]
+            likes = post.likes.count()
+            liked = request.user in post.likes.all()
+            packet += [
+                # Merge post dict with the rest
+                dict(post.serialize(), ** {
+                    "ownerShip": ownerShip,
+                    "likes": likes,
+                    "liked": liked,
+                }) 
+            ]
 
         # Build API content
         respone = {
@@ -112,8 +122,16 @@ def profilePost(request, user, currentPost):
         packet = []
         for post in posts:
             ownerShip = post.owner == request.user
-            post = post.serialize()
-            packet += [{"post": post, "ownerShip": ownerShip}]
+            likes = post.likes.count()
+            liked = request.user in post.likes.all()
+            packet += [
+                # Merge post dict with the rest
+                dict(post.serialize(), ** {
+                    "ownerShip": ownerShip,
+                    "likes": likes,
+                    "liked": liked,
+                }) 
+            ]
 
         respone = {
             "posts": packet,
@@ -121,6 +139,41 @@ def profilePost(request, user, currentPost):
         }
 
         return JsonResponse(respone, safe=False)
+    
+    
+@csrf_protect
+def followingPosts(request, currentPost):
+    if request.user.is_authenticated:
+        if request.method == "GET":
+            # Get requested user's following list
+            users = User.objects.filter(follower=request.user)
+
+            # Get target's posts
+            posts = Post.objects.filter(owner__in= users).order_by(
+                "-timeStamp")[currentPost: currentPost + 10]
+
+            packet = []
+            for post in posts:
+                ownerShip = post.owner == request.user
+                likes = post.likes.count()
+                liked = request.user in post.likes.all()
+                packet += [
+                    # Merge post dict with the rest
+                    dict(post.serialize(), ** {
+                        "ownerShip": ownerShip,
+                        "likes": likes,
+                        "liked": liked,
+                    }) 
+                ]
+
+            respone = {
+                "posts": packet,
+                "outOfPosts": len(posts) < 10,
+            }
+
+            return JsonResponse(respone, safe=False)
+    else:
+        return JsonResponse("User must log in to do that!", status=403, safe=False)
 
 
 @csrf_protect
@@ -133,7 +186,7 @@ def userInfo(request, user):
             owner = True
 
         # Check if user is following the requested user
-        elif request.user.is_authenticated and user in requestedUser.follower.all():
+        elif request.user.is_authenticated and request.user in requestedUser.follower.all():
             owner = False
             isFollowing = True
         else:
@@ -158,25 +211,48 @@ def follow(request, user):
             requestedUser = User.objects.get(username=request.user)
             userToFollow = User.objects.get(username=user)
 
+            # Check for self follow
+            try:
+                from django.core.exceptions import ValidationError
+                userToFollow.clean(requestedUser)
+            except ValidationError:
+                return JsonResponse("Cannot follow yourself", status=405, safe=False)
+
             # Follow the requested user if not already following and vice versa
-            if requestedUser in requestedUser.follower.all():
+            if requestedUser in userToFollow.follower.all():
                 userToFollow.follower.remove(requestedUser)
                 requestedUser.following.remove(userToFollow)
             else:
-                userToFollow.follower.add(requestedUser)
                 requestedUser.following.add(userToFollow)
+                userToFollow.follower.add(requestedUser)
 
             requestedUser.save()
+            userToFollow.save()
         return JsonResponse("done", safe=False)
     else:
-        return JsonResponse("error", safe=False)
+        return JsonResponse("User must log in to do that!", status=403, safe=False)
 
-# TODO: this for later
+
 @csrf_protect
-def like(request):
-    pass
-#     if request.method == "POST":
-#         post = Post.object
+def like(request, id):
+    if request.user.is_authenticated:
+        if request.method == "PUT":
+            requestedUser = User.objects.get(username=request.user)
+            try:
+                post = Post.objects.get(id=id)
+            except Post.DoesNotExist:
+                return JsonResponse("Post not found", status=404, safe=False)
+
+            # Follow the requested user if not already following and vice versa
+            if requestedUser in post.likes.all():
+                post.likes.remove(requestedUser)
+            else:
+                post.likes.add(requestedUser)
+
+            post.save()
+        return JsonResponse({"likes": post.likes.count()}, safe=False)
+    else:
+        return JsonResponse("Authencation Failed", status=403, safe=False)
 
 
 @csrf_protect
@@ -187,10 +263,8 @@ def editPost(request, postId):
         post = Post.objects.get(id=postId)
         if request.user != post.owner:
             return JsonResponse({"errors": "Authencated Failed"}, status=403, safe=False)
-            
+
         post.content = data["content"]
         post.save()
 
-        # TODO: render posted post as the first post like fb
-        return JsonResponse({"post": post.serialize()}, safe=False)
-    
+        return JsonResponse({"post": post.serialize()}, safe=False) 

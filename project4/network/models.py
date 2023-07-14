@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.core.exceptions import ValidationError
+
 import datetime
 
 
@@ -8,10 +10,10 @@ class User(AbstractUser):
     following = models.ManyToManyField("self")
 
     # TODO: Test this clean method
-    def clean(self):
+    def clean(self, user):
         # Check if the entry is already in related_entries
-        if self in self.following.all():
-            raise models.RestrictedError("Cannot add self to related_entries.")
+        if user == self:
+            raise ValidationError("You cannot follow yourself.")
 
     def serialize(self):
         return {
