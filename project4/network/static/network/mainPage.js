@@ -26,7 +26,7 @@ function App() {
                     <Header header={header} />
                     <div id="main">
                         <UserHeader user={user} />
-                        <Posts path="profile" user={user} />
+                        <Posts path="post/profile" user={user} />
                     </div>
                 </div>
             );
@@ -36,7 +36,7 @@ function App() {
                 <div>
                     <Header header={header} />
                     <div id="main">
-                        <Posts path="following" />
+                        <Posts path="post/following" />
                     </div>
                 </div>
             );
@@ -44,8 +44,6 @@ function App() {
         default:
             break;
     }
-
-
 }
 
 
@@ -65,16 +63,13 @@ function Header(props) {
 
 function NewPost() {
     async function handleNewPost(e) {
-        // Stop form from submitting
-        e.preventDefault();
-
         // Get data of email send
         const post = {
             "content": e.target.elements.post.value,
         };
 
         // Send post to server
-        const responne = await fetch("/api/newpost", {
+        const respone = await fetch("/api/newpost", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -82,9 +77,9 @@ function NewPost() {
             },
             body: JSON.stringify(post),
         });
-        const data = await responne.json();
-
-        data.timeStamp = new Date(data.timeStamp * 1000);
+        if (!respone.ok) {
+            alert("User must log in to do that!");
+        }
     }
 
     return (
@@ -107,14 +102,14 @@ function UserHeader(props) {
 
     React.useEffect(() => {
         const header = async () => {
-            const responne = await fetch(`/api/userinfo/${props.user}`, {
+            const respone = await fetch(`/api/userinfo/${props.user}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
                 },
             })
-            const data = await responne.json();
+            const data = await respone.json();
             setInfo(data.userInfo);
             setOwner(data.owner);
             setFollowState(data.isFollowing);
@@ -130,9 +125,14 @@ function UserHeader(props) {
                 "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
             },
         })
-        const data = await respone.json();
-        setDisable(data === "error" ? true : false);
-        setFollowState(followState => !followState);
+        if (!respone.ok) {
+            alert("User must log in to do that!");
+        }
+        else {
+            const data = await respone.json();
+            setDisable(data === "error" ? true : false);
+            setFollowState(followState => !followState);
+        }
     }, []);
 
 
@@ -147,7 +147,6 @@ function UserHeader(props) {
 }
 
 
-// TODO: make this avaible for other's use
 function Posts({ path, user }) {
     const [posts, morePosts] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
@@ -158,57 +157,59 @@ function Posts({ path, user }) {
     const fullPath = [path, user].filter(Boolean).join("/");
 
     // Request post from server
-    const display = React.useCallback(async () => {
+    async function display() {
         // TODO: Update this buy-time mechanic (Current problem: loading always 
         // false even when currenPostIndex and hasMore had not been update)
-
         // Begin fetching request
         setLoading(true);
-        const responne = await fetch(`/api/${fullPath}/${currentPostIndex.current}`, {
+        fetch(`/api/${fullPath}/${currentPostIndex.current}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
             },
+        }).then(res => {
+            return !res.ok 
+            ? res.json().then(e => Promise.reject(e))
+            : res.json();
+        }).then(data => {
+            morePosts(pevPosts => [...pevPosts, ...data.posts]);
+            currentPostIndex.current += 10;
+            setHasMore(!data.outOfPosts);
+            setLoading(false);
+        }).catch(err => {
+            alert(err);
+            window.location.href = "/";
         });
-
-        const data = await responne.json();
-
-        morePosts(pevPosts => [...pevPosts, ...data.posts]);
-        currentPostIndex.current += 10;
-        setHasMore(!data.outOfPosts);
-        setLoading(false);
-
-    }, [currentPostIndex]);
-
-
+    }
+    
     React.useEffect(() => {
         display();
     }, []);
 
-    React.useEffect(() => {
-        const onScroll = () => {
-            if (loading || !hasMore) {
-                return;
-            }
+    // TODO: turn this back to set timeout
+    // Handle scroll event
+    const onScroll = () => {
+        if (loading || !hasMore) return;
 
-            // If user scroll to the end of page, fetch more posts
-            if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 200) {
-                display();
-            }
+        if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 50) {
+            display();
         }
+    };
+
+    React.useEffect(() => {
         // clean up code
         window.addEventListener('scroll', onScroll, { passive: true });
 
         return () => window.removeEventListener('scroll', onScroll);
-    }, [loading, hasMore, display]);
+    }, [loading, hasMore]);
 
 
     return (
         // TODO: keep render new element but not re-render causing page resetting? 
         <div>
             {posts.map((post) => (
-                <SinglePost post={post.post} pid={post.post.id} key={post.post.id} ownerShip={post.ownerShip} />
+                <SinglePost post={post} pid={post.id} key={Math.random()*200000 +post.id} />
             ))}
         </div>
     );
@@ -238,7 +239,7 @@ function SinglePost(props) {
                     <span className="owner">{props.post.owner}</span>
                 </a>
                 <span className="time-stamp">{date} {props.pid}</span>
-                {props.ownerShip ?
+                {props.post.ownerShip ?
                     <div className={`edit-btn ${editState ? "editing" : ""}`} onClick={() => setEditState(per => !per)}>
                         <span>&#9998;</span>
                     </div>
@@ -253,26 +254,34 @@ function SinglePost(props) {
 
 function DisplayPost(props) {
     // TODO: manange like button (later)
-    const [likeState, changeLikeStage] = React.useState(props.post.likes);
+    const [likeState, setLikeStage] = React.useState(props.post.liked);
+    const [likes, setLikes] = React.useState(props.post.likes);
 
-    async function like() {
-        let respone = await fetch("/like", {
-            method: "POST",
+    const like = React.useCallback(async () => {
+        const respone = await fetch(`/api/like/${props.post.id}`, {
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
             },
         })
-        let data = respone.json();
-        console.log(respone);
-    }
+        if (!respone.ok) {
+            alert("You must login to like post");
+        }
+        else {
+            // TODO: fix this likeState not update (infinitive loop at likeState)
+            setLikeStage(per => !per);
+            setLikes(per => per + (likeState ? -1 : 1));
+        }
+    }, [likeState]);
+
     return (
         <div>
             <div className="content">{props.currentContent}</div>
-            <div className="likes">
-                <i style={{ fontSize: "24px", color: "red", marginRight: "0.5rem" }}>&#9829;</i>
-                {props.post.likes}
-            </div>
+            <span className="likes" onClick={like}>
+                <i style={{ fontSize: "24px", color: `${likeState ? "red" : "white"}`, marginRight: "0.5rem" }}>&#9829;</i>
+                {likes}
+            </span>
         </div>
     )
 }
@@ -280,7 +289,7 @@ function DisplayPost(props) {
 function EditPost(props) {
     const content = React.useRef(null);
     const editPost = React.useCallback(async () => {
-        const responne = await fetch(`/api/editpost/${props.id}`, {
+        const respone = await fetch(`/api/editpost/${props.id}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -288,7 +297,7 @@ function EditPost(props) {
             },
             body: JSON.stringify({ content: content.current.textContent }),
         });
-        const data = await responne.json();
+        const data = await respone.json();
         props.handleState.setCurrentContent(data.post.content);
         props.handleState.setEditState(false);
     }, [content]);
@@ -328,7 +337,7 @@ function EditPost(props) {
 // TODO: turn this to general use fetch (change url to var)
 function TestAPI() {
     const a = async function request() {
-        const responne = await fetch("/api/editpost/59", {
+        const respone = await fetch("/api/editpost/59", {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -336,7 +345,7 @@ function TestAPI() {
             },
             body: JSON.stringify({ content: "lmao" }),
         });
-        const data = await responne.json();
+        const data = await respone.json();
         console.log(data);
     }
     return (

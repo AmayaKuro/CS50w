@@ -77,6 +77,12 @@ body {
     color: #788;
 }
 
+.likes {
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
 
 input:not([type="submit"]), textarea {
     background-color: rgb(82, 86, 91);
