@@ -14,6 +14,8 @@ node_modules/
 # Ignore migrate files
 **/migrations/
 
+# Ignore database
+db.sqlite3
 
 # ============  FE  ============= #
 # dependencies
