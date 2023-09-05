@@ -8,24 +8,20 @@ import asyncio
 from ..typing import Any, CreateResult
 from .base_provider import AsyncProvider, get_cookies
 
-class Bard(AsyncProvider):
-    url = "https://bard.google.com"
+
+class Bard(AsyncProvider):        
     needs_auth = False
     working = True
 
-    @classmethod
-    async def create_async(
-        cls,
+    @staticmethod
+    async def request_async(
         model: str,
-        messages: str,
-        proxy: str = None,
-        cookies: dict = get_cookies(".google.com"),
+        freq: str,
+        intents: str,
         **kwargs: Any,
     ) -> str:
-
-
-        if proxy and "://" not in proxy:
-            proxy = f"http://{proxy}"
+        url = "https://bard.google.com"
+        cookies = get_cookies(".google.com")
 
         headers = {
             'authority': 'bard.google.com',
@@ -39,7 +35,7 @@ class Bard(AsyncProvider):
             headers=headers,
             cookies=cookies
         ) as session:
-            async with session.get(cls.url, proxy=proxy) as response:
+            async with session.get(url) as response:
                 text = await response.text()
             
             match = re.search(r'SNlM0e\":\"(.*?)\"', text)
@@ -54,25 +50,101 @@ class Bard(AsyncProvider):
 
             data = {
                 'at': snlm0e,
-                'f.req': json.dumps([None, json.dumps([[messages]])])
+                'f.req': freq
             }
 
-            intents = '.'.join([
-                'assistant',
-                'lamda',
-                'BardFrontendService'
-            ])
-
             async with session.post(
-                f'{cls.url}/_/BardChatUi/data/{intents}/StreamGenerate',
+                f'{url}/_/BardChatUi/data/{intents}',
                 data=data,
                 params=params,
-                proxy=proxy
             ) as response:
-                response = await response.text()
-                response = json.loads(response.splitlines()[3])[0][2]
-                response = json.loads(response)[4][0][1][0]
-                return response
+                return await response.text()
+            
+
+    @classmethod
+    async def create_async(
+        cls,
+        model: str,
+        messages: str,
+        conversation_id: str = '',
+        response_id: str = '',
+        choice_id: str = '',
+        **kwargs: Any,
+    ) -> str:
+        freq = json.dumps([None, json.dumps([[messages], None, [conversation_id, response_id, choice_id]])])
+
+        intents = '.'.join([
+            'assistant',
+            'lamda',
+            'BardFrontendService',
+            
+        ]) + '/StreamGenerate'
+
+        data = await cls.request_async(
+            model = model,
+            freq = freq,
+            intents = intents,
+            **kwargs,
+        )
+
+        try:
+            answer = {}
+
+            response = json.loads(data.splitlines()[3])[0][2]
+            chat = json.loads(response)
+
+            answer['conversation_id'], answer['response_id'] = chat[1]
+            answer['title'] = chat[2][0][0]
+            answer['log'] = chat[4][0][1][0]
+
+            return json.dumps(answer)
+        except:
+            return 'error'
+
+
+    @classmethod
+    async def get_async(
+        cls,
+        model: str,
+        conversation_id: str,
+        rpcids: str = 'hNvQHb',
+        **kwargs: Any,
+    ) -> str:
+        freq = json.dumps([[[rpcids, json.dumps([conversation_id, 10]), None, "generic"]]])
+
+        intents = 'batchexecute'
+
+        data = await cls.request_async(
+            model = model,
+            freq = freq,
+            intents = intents,
+            **kwargs,
+        )
+
+        try:
+            data = json.loads(data.splitlines()[3])
+            chats = json.loads(data[0][2])[0]
+        except:
+            return 'error'
+
+        conversation = []
+
+        for chat in chats:     
+            try:
+                response_id = chat[1][1]
+            except:
+                response_id = chat[0][1]       
+            title : str = chat[2][0][0]
+            log : str = chat[3][0][0][1][0]
+
+            conversation.append({
+                'response_id': response_id,
+                'title': title,
+                'log': log
+                })
+
+        return json.dumps(conversation)
+
 
     @classmethod
     @property

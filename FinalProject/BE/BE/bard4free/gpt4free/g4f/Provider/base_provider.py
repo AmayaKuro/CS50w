@@ -7,6 +7,7 @@ import asyncio
 from time import time
 import math
 
+
 class BaseProvider(ABC):
     url: str
     working = False
@@ -19,11 +20,21 @@ class BaseProvider(ABC):
     @abstractmethod
     def create_completion(
         model: str,
-        messages: list[dict[str, str]],
-        stream: bool,
+        messages: str,
         **kwargs: Any,
     ) -> CreateResult:
         raise NotImplementedError()
+    
+    @staticmethod
+    @abstractmethod
+    def get_completion(
+        model: str,
+        conversation_id: str,
+        rpcids: str,
+        **kwargs: Any,
+    ) -> CreateResult:
+        raise NotImplementedError()
+
 
     @classmethod
     @property
@@ -35,7 +46,7 @@ class BaseProvider(ABC):
         ]
         param = ", ".join([": ".join(p) for p in params])
         return f"g4f.provider.{cls.__name__} supports: ({param})"
-    
+
 
 _cookies = {}
 
@@ -53,63 +64,55 @@ class AsyncProvider(BaseProvider):
     def create_completion(
         cls,
         model: str,
-        messages: list[dict[str, str]],
-        stream: bool = False,
-        **kwargs: Any
+        messages: str,
+        conversation_id: str = '',
+        response_id: str = '',
+        choice_id: str = '',
+        **kwargs: Any,
     ) -> CreateResult:
-        yield asyncio.run(cls.create_async(model, messages, **kwargs))
+        yield asyncio.run(cls.create_async(
+            model = model, 
+            messages = messages,
+            conversation_id = conversation_id,
+            response_id = response_id,
+            choice_id = choice_id,
+            **kwargs,
+        ))
 
     @staticmethod
     @abstractmethod
     async def create_async(
         model: str,
-        messages: list[dict[str, str]],
+        messages: str,
+        conversation_id: str,
+        response_id: str,
+        choice_id: str,
         **kwargs: Any,
     ) -> str:
         raise NotImplementedError()
 
 
-class AsyncGeneratorProvider(AsyncProvider):
     @classmethod
-    def create_completion(
+    def get_completion(
         cls,
         model: str,
-        messages: list[dict[str, str]],
-        stream: bool = True,
-        **kwargs: Any
-    ) -> CreateResult:
-        if stream:
-            yield from run_generator(cls.create_async_generator(model, messages, **kwargs))
-        else:
-            yield from AsyncProvider.create_completion(cls=cls, model=model, messages=messages, **kwargs)
-
-    @classmethod
-    async def create_async(
-        cls,
-        model: str,
-        messages: list[dict[str, str]],
+        conversation_id: str,
+        rpcids: str,
         **kwargs: Any,
-    ) -> str:
-        chunks = [chunk async for chunk in cls.create_async_generator(model, messages, **kwargs)]
-        if chunks:
-            return "".join(chunks)
-        
+    ) -> CreateResult:
+        yield asyncio.run(cls.get_async(
+            model = model, 
+            conversation_id=conversation_id,
+            rpcids=rpcids,
+            **kwargs
+        ))
+
     @staticmethod
     @abstractmethod
-    def create_async_generator(
-            model: str,
-            messages: list[dict[str, str]],
-        ) -> AsyncGenerator:
+    async def get_async(
+        model: str,
+        conversation_id: str,
+        rpcids: str,
+        **kwargs: Any,
+    ) -> str:
         raise NotImplementedError()
-
-
-def run_generator(generator: AsyncGenerator[Union[Any, str], Any]):
-    loop = asyncio.new_event_loop()
-    gen = generator.__aiter__()
-
-    while True:
-        try:
-            yield loop.run_until_complete(gen.__anext__())
-
-        except StopAsyncIteration:
-            break

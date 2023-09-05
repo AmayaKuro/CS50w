@@ -5,9 +5,6 @@ venv/
 # Ignore node_modules
 node_modules/
 
-# Ignore .vscode
-.vscode/
-
 # Ignore accounts created by api's
 **/__pycache__/
 
@@ -52,3 +49,13 @@ yarn-error.log*
 FE/*.tsbuildinfo
 next-env.d.ts
 
+
+# ============  Other  ============= #
+# Ignore .vscode
+.vscode/
+
+# Ignore .idea
+.idea/
+
+# Ignore test files
+**/test.*
