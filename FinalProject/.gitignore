@@ -12,7 +12,7 @@ node_modules/
 **/migrations/
 
 # Ignore database
-db.sqlite3
+**/db.*
 
 # ============  FE  ============= #
 # dependencies
