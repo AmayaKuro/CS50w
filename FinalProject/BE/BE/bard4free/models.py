@@ -49,11 +49,11 @@ class User(AbstractBaseUser):
 class Conversations(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="conversations")
     conversation_id = models.CharField(max_length=64, unique=True, blank=False, null=False)
+    title = models.TextField(max_length=64, blank=False, null=False)
 
 
 class Responses(models.Model):
     response_id = models.CharField(max_length=64, unique=True, blank=False, null=False)
     choice_id = models.CharField(max_length=64, unique=True, blank=False, null=False)
     conversation = models.ForeignKey(Conversations, on_delete=models.CASCADE, related_name="responses")
-    title = models.TextField()
     log = models.TextField()

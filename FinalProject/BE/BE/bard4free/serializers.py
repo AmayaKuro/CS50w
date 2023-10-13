@@ -33,13 +33,13 @@ class UserAndTokenObtainPairSerializer(TokenObtainPairSerializer):
 class ResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Responses
-        fields = ['response_id', 'choice_id', 'title', 'log']
+        fields = '__all__'
 
 
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversations
-        fields = ['conversation_id']
+        fields = '__all__'
 
     @staticmethod
     def specific(conversation_id):
