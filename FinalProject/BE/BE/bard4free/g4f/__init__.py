@@ -2,16 +2,19 @@ import json
 
 from . import models
 from .Provider import BaseProvider
-from .typing import Any, CreateResult, Union
+from .typing import Any, CreateResult, Union, ChatResponse
 
 logging = False
 
 
 class ChatCompletion:
     @staticmethod
-    def __json_response(response: CreateResult) -> dict:
-        return json.loads(''.join(response)) if response != 'error' else ValueError('Invalid inputs')
-
+    def __json_response(response: CreateResult) -> ChatResponse:
+        return (
+            json.loads("".join(response))
+            if response != "error"
+            else ValueError("Invalid inputs")
+        )
 
     @classmethod
     def create(
@@ -19,12 +22,12 @@ class ChatCompletion:
         model: Union[models.Model, str],
         messages: str,
         provider: Union[type[BaseProvider], None] = None,
-        conversation_id: str = '',
-        response_id: str = '',
-        choice_id: str = '',
+        conversation_id: str = "",
+        response_id: str = "",
+        choice_id: str = "",
         auth: Union[str, None] = None,
         **kwargs: Any,
-    ) -> Union[CreateResult, str]:
+    ) -> ChatResponse:
         if isinstance(model, str):
             try:
                 model = models.ModelUtils.convert[model]
@@ -47,14 +50,15 @@ class ChatCompletion:
             print(f"Using {provider.__name__} provider")
 
         result = provider.create_completion(
-            model=model.name, 
+            model=model.name,
             messages=messages,
             conversation_id=conversation_id,
             response_id=response_id,
             choice_id=choice_id,
-            **kwargs)
+            **kwargs,
+        )
         return cls.__json_response(result)
-    
+
     @classmethod
     def get(
         cls,
@@ -64,7 +68,7 @@ class ChatCompletion:
         provider: Union[type[BaseProvider], None] = None,
         auth: Union[str, None] = None,
         **kwargs: Any,
-    ) -> Union[CreateResult, str]:
+    ) -> ChatResponse:
         if isinstance(model, str):
             try:
                 model = models.ModelUtils.convert[model]

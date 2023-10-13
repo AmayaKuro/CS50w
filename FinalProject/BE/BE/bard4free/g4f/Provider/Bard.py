@@ -90,12 +90,18 @@ class Bard(AsyncProvider):
         try:
             answer = {}
 
+            # Obtain response_id, choice_id, log
             response = json.loads(data.splitlines()[3])[0][2]
             chat = json.loads(response)
 
             answer['conversation_id'], answer['response_id'] = chat[1]
-            answer['title'] = chat[2][0][0]
+            answer['choice_id'] = chat[4][0][0]
             answer['log'] = chat[4][0][1][0]
+
+            # Obtain title if exists
+            if conversation_id == '':
+                response = json.loads(data.splitlines()[5])[0][2]
+                answer['title'] = json.loads(response)[10][0]
 
             return json.dumps(answer)
         except:
