@@ -31,19 +31,13 @@ class UserAndTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class ResponseSerializer(serializers.ModelSerializer):
+    conversation = serializers.CharField(source='conversation_id')
     class Meta:
         model = Responses
-        fields = '__all__'
+        fields = ['response_id', 'choice_id', 'log', 'conversation']
 
 
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversations
-        fields = '__all__'
-
-    @staticmethod
-    def specific(conversation_id):
-        conversation = Conversations.objects.get(conversation_id=conversation_id)
-        responses = conversation.responses.all()
-        serializer = ResponseSerializer(responses, many=True)
-        return serializer
+        fields = ['conversation_id', 'title']

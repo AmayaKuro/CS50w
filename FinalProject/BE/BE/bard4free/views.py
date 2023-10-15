@@ -15,6 +15,7 @@ from .g4f import ChatCompletion
 
 from .models import Conversations, Responses, User
 from .serializers import *
+from .utils import *
 
 
 # TODO: authenticate user before allowing them to create a conversation
@@ -41,53 +42,61 @@ def requestConversation(request):
     if request.method == "GET":
         if not rpcids:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-    # TODO: add parent response id to the response model
-    # TODO: change ConversationSerializer.specific to ResponeSerializer and return a list of responses
+        
+        # TODO: add parent response id to the response model
         if rpcids == "specific":
             conversation_id = request.GET.get("conversation_id")
-            conversation = Conversations.objects.get(conversation_id=conversation_id)
-
-            if conversation is None:
+            if not conversation_id:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
 
-            serializer = ConversationSerializer.specific(conversation_id)
+            try:
+                responses = Responses.objects.values("response_id", "choice_id", "log", "conversation").filter(
+                    conversation__conversation_id=conversation_id
+                )
+            except:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = ResponseSerializer(responses, many=True)
+            return Response(serializer.data)
 
         elif rpcids == "list":
-            conversations = Conversations.objects.filter(owner=request.user)
+            # Test values_list (delte later)
+            conversations = Conversations.objects.values("conversation_id", "title").filter(owner=request.user)
             serializer = ConversationSerializer(conversations, many=True)
 
-        return Response(serializer.data)
+            return Response(serializer.data)
 
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        
     elif request.method == "POST":
         if rpcids == "create":
             messages = request.POST.get("messages")
-            if not messages:
+            conversation_id = request.POST.get("conversation_id")
+            response_id = request.POST.get("response_id")
+            choice_id = request.POST.get("choice_id")
+
+            conversation_key = None
+
+            # Check if input is valid
+            if not messages or (conversation_id and not idCheck(conversation_id, response_id, choice_id)):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            conversation_id = request.POST.get("conversation_id") or ""
+            
+            try:
+                chat = ChatCompletion.create(
+                    model="palm",
+                    messages=messages,
+                    conversation_id=conversation_id,
+                    response_id=response_id,
+                    choice_id=choice_id,
+                )
+            except:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
-            # Check if conversation_id is valid
-            if conversation_id != "":
-                try:
-                    conversation_key = Conversations.objects.get(conversation_id=conversation_id).id
-                except:
-                    return Response(status=status.HTTP_400_BAD_REQUEST)
-                
-
-            # Try 3 times to create a conversation
-            for i in range(3):
-                try:
-                    chat = ChatCompletion.create(
-                        model="palm", messages=messages, conversation_id=conversation_id
-                    )
-                    break
-                except:
-                    continue
-            else:
-                return Response(status=status.HTTP_408_REQUEST_TIMEOUT)
-
-
-            # Prepare the data for saving conversation if new
-            if not conversation_key:
+            # Try to get the conversation, if it doesn't exist, create it
+            try:
+                conversation_key = Conversations.objects.values("id").get(conversation_id=conversation_id).get("id")
+            except Conversations.DoesNotExist:
                 data = {
                     "conversation_id": chat["conversation_id"],
                     "title": chat["title"],
@@ -104,16 +113,15 @@ def requestConversation(request):
                 "conversation": conversation_key,
                 "response_id": chat["response_id"],
                 "choice_id": chat["choice_id"],
-                "title": chat["title"],
                 "log": chat["log"],
             }
 
-            serializer = ResponseSerializer(data=data)
+            serializer = ResponseSerializer(data=data, context={"conversation": conversation_key})
             if serializer.is_valid():
-                serializer.save(conversation=conversation)
+                serializer.save()
 
                 return Response(chat, status=status.HTTP_201_CREATED)
-            
+
             return Response(status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
