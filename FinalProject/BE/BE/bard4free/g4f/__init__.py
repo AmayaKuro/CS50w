@@ -92,3 +92,7 @@ class ChatCompletion:
 
         result = provider.get_completion(model.name, conversation_id, rpcids, **kwargs)
         return cls.__json_response(result)
+
+    @classmethod
+    def delete():
+        pass
