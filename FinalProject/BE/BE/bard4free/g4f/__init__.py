@@ -19,38 +19,14 @@ class ChatCompletion:
     @classmethod
     def create(
         cls,
-        model: Union[models.Model, str],
         messages: str,
-        provider: Union[type[BaseProvider], None] = None,
+        provider: type[BaseProvider],
         conversation_id: str = "",
         response_id: str = "",
         choice_id: str = "",
-        auth: Union[str, None] = None,
         **kwargs: Any,
     ) -> ChatResponse:
-        if isinstance(model, str):
-            try:
-                model = models.ModelUtils.convert[model]
-            except KeyError:
-                raise Exception(f"The model: {model} does not exist")
-
-        provider = model.best_provider if provider == None else provider
-
-        if not provider.working:
-            raise Exception(f"{provider.__name__} is not working")
-
-        if provider.needs_auth and not auth:
-            raise Exception(
-                f'ValueError: {provider.__name__} requires authentication (use auth="cookie or token or jwt ..." param)'
-            )
-        if provider.needs_auth:
-            kwargs["auth"] = auth
-
-        if logging:
-            print(f"Using {provider.__name__} provider")
-
         result = provider.create_completion(
-            model=model.name,
             messages=messages,
             conversation_id=conversation_id,
             response_id=response_id,
@@ -62,37 +38,20 @@ class ChatCompletion:
     @classmethod
     def get(
         cls,
-        model: Union[models.Model, str],
         conversation_id: str,
-        rpcids: str = "hNvQHb",
-        provider: Union[type[BaseProvider], None] = None,
-        auth: Union[str, None] = None,
+        provider: type[BaseProvider],
         **kwargs: Any,
     ) -> ChatResponse:
-        if isinstance(model, str):
-            try:
-                model = models.ModelUtils.convert[model]
-            except KeyError:
-                raise Exception(f"The model: {model} does not exist")
-
-        provider = model.best_provider if provider == None else provider
-
-        if not provider.working:
-            raise Exception(f"{provider.__name__} is not working")
-
-        if provider.needs_auth and not auth:
-            raise Exception(
-                f'ValueError: {provider.__name__} requires authentication (use auth="cookie or token or jwt ..." param)'
-            )
-        if provider.needs_auth:
-            kwargs["auth"] = auth
-
-        if logging:
-            print(f"Using {provider.__name__} provider")
-
-        result = provider.get_completion(model.name, conversation_id, rpcids, **kwargs)
+        result = provider.get_completion(conversation_id, **kwargs)
         return cls.__json_response(result)
 
     @classmethod
-    def delete():
-        pass
+    def delete(
+        cls,
+        conversation_id: str,
+        provider: type[BaseProvider],
+        **kwargs: Any,
+    ) -> str:
+        result = provider.delete_completion(conversation_id, **kwargs)
+        result = "".join(result)
+        return result

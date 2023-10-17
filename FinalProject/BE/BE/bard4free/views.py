@@ -12,6 +12,7 @@ from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework.exceptions import ValidationError
 
 from .g4f import ChatCompletion
+from .g4f.Provider.Bard import Bard
 
 from .models import Conversations, Responses, User
 from .serializers import *
@@ -84,7 +85,7 @@ def requestConversation(request):
             
             try:
                 chat = ChatCompletion.create(
-                    model="palm",
+                    provider=Bard,
                     messages=messages,
                     conversation_id=conversation_id,
                     response_id=response_id,
@@ -116,12 +117,30 @@ def requestConversation(request):
                 "log": chat["log"],
             }
 
-            serializer = ResponseSerializer(data=data, context={"conversation": conversation_key})
+            serializer = ResponseSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
 
                 return Response(chat, status=status.HTTP_201_CREATED)
 
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        if rpcids == "delete":
+            conversation_id = request.POST.get("conversation_id")
+            if not conversation_id or not idCheck(conversation_id):
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                Conversations.objects.filter(conversation_id=conversation_id).delete()
+                Responses.objects.filter(conversation__conversation_id=conversation_id).delete()
+            except:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            
+            ChatCompletion.delete(
+                provider=Bard,
+                conversation_id=conversation_id,
+            )
+            
+            return Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)

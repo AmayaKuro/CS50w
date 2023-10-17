@@ -19,7 +19,6 @@ class BaseProvider(ABC):
     @staticmethod
     @abstractmethod
     def create_completion(
-        model: str,
         messages: str,
         **kwargs: Any,
     ) -> CreateResult:
@@ -28,11 +27,17 @@ class BaseProvider(ABC):
     @staticmethod
     @abstractmethod
     def get_completion(
-        model: str,
         conversation_id: str,
-        rpcids: str,
         **kwargs: Any,
     ) -> CreateResult:
+        raise NotImplementedError()
+    
+    @staticmethod
+    @abstractmethod
+    def delete_completion(
+        conversation_id: str,
+        **kwargs: Any,
+    ) -> str:
         raise NotImplementedError()
 
 
@@ -63,7 +68,6 @@ class AsyncProvider(BaseProvider):
     @classmethod
     def create_completion(
         cls,
-        model: str,
         messages: str,
         conversation_id: str = '',
         response_id: str = '',
@@ -71,7 +75,6 @@ class AsyncProvider(BaseProvider):
         **kwargs: Any,
     ) -> CreateResult:
         yield asyncio.run(cls.create_async(
-            model = model, 
             messages = messages,
             conversation_id = conversation_id,
             response_id = response_id,
@@ -82,7 +85,6 @@ class AsyncProvider(BaseProvider):
     @staticmethod
     @abstractmethod
     async def create_async(
-        model: str,
         messages: str,
         conversation_id: str,
         response_id: str,
@@ -95,24 +97,38 @@ class AsyncProvider(BaseProvider):
     @classmethod
     def get_completion(
         cls,
-        model: str,
         conversation_id: str,
-        rpcids: str,
         **kwargs: Any,
     ) -> CreateResult:
         yield asyncio.run(cls.get_async(
-            model = model, 
             conversation_id=conversation_id,
-            rpcids=rpcids,
             **kwargs
         ))
 
     @staticmethod
     @abstractmethod
     async def get_async(
-        model: str,
         conversation_id: str,
-        rpcids: str,
         **kwargs: Any,
     ) -> str:
         raise NotImplementedError()
+    
+    @classmethod
+    @abstractmethod
+    def delete_async(
+        cls,
+        conversation_id: str = '',
+        **kwargs: Any,
+    ) -> str:
+       raise NotImplementedError()
+    
+    @classmethod
+    def delete_completion(
+        cls,
+        conversation_id: str,
+        **kwargs: Any,
+    ) -> CreateResult:
+        yield asyncio.run(cls.delete_async(
+            conversation_id=conversation_id,
+            **kwargs
+        ))

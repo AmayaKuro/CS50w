@@ -15,7 +15,6 @@ class Bard(AsyncProvider):
 
     @staticmethod
     async def request_async(
-        model: str,
         freq: str,
         intents: str,
         **kwargs: Any,
@@ -64,7 +63,6 @@ class Bard(AsyncProvider):
     @classmethod
     async def create_async(
         cls,
-        model: str,
         messages: str,
         conversation_id: str = '',
         response_id: str = '',
@@ -81,7 +79,6 @@ class Bard(AsyncProvider):
         ]) + '/StreamGenerate'
 
         data = await cls.request_async(
-            model = model,
             freq = freq,
             intents = intents,
             **kwargs,
@@ -99,7 +96,7 @@ class Bard(AsyncProvider):
             answer['log'] = chat[4][0][1][0]
 
             # Obtain title if exists
-            if conversation_id == '':
+            if not conversation_id:
                 response = json.loads(data.splitlines()[5])[0][2]
                 answer['title'] = json.loads(response)[10][0]
 
@@ -111,17 +108,14 @@ class Bard(AsyncProvider):
     @classmethod
     async def get_async(
         cls,
-        model: str,
         conversation_id: str,
-        rpcids: str = 'hNvQHb',
         **kwargs: Any,
     ) -> str:
-        freq = json.dumps([[[rpcids, json.dumps([conversation_id, 10]), None, "generic"]]])
+        freq = json.dumps([[['hNvQHb', json.dumps([conversation_id, 10]), None, "generic"]]])
 
         intents = 'batchexecute'
 
         data = await cls.request_async(
-            model = model,
             freq = freq,
             intents = intents,
             **kwargs,
@@ -150,6 +144,22 @@ class Bard(AsyncProvider):
                 })
 
         return json.dumps(conversation)
+    
+    @classmethod
+    async def delete_async(
+        cls,
+        conversation_id: str,
+        **kwargs: Any,
+    ) -> str:
+        freq = json.dumps([[['GzXR5e', json.dumps([conversation_id]), None, 'generic']]])
+
+        intents = 'batchexecute'
+
+        return await cls.request_async(
+            freq = freq,
+            intents = intents,
+            **kwargs,
+        )
 
 
     @classmethod
