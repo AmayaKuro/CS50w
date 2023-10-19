@@ -6,6 +6,8 @@ import { SessionProvider, SessionProviderProps } from "next-auth/react";
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
+import { AnimatePresence } from 'framer-motion';
+
 type Props = {
   children?: React.ReactNode;
 };
@@ -40,3 +42,7 @@ export const Theme = ({ children }: Props) => {
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 };
 
+
+export const AnimateProvider = ({ children }: Props) => {
+  return <AnimatePresence mode="wait">{children}</AnimatePresence>;
+}
