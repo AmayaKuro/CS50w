@@ -1,11 +1,9 @@
 import './globals.css'
 
 import type { Metadata } from 'next'
-import { AppProps } from 'next/app'
-import Head from 'next/head'
 import { Roboto } from 'next/font/google'
 
-import { NextAuthProvider, Theme, AnimateProvider } from "./providers";
+import { NextAuthProvider, Theme, AnimateProvider } from "@/assets/providers/framework";
 
 
 const inter = Roboto({
@@ -26,13 +24,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Theme>
-          <NextAuthProvider>
+        <NextAuthProvider>
+          <Theme>
             <AnimateProvider>
               {children}
             </AnimateProvider>
-          </NextAuthProvider>
-        </Theme>
+          </Theme>
+        </NextAuthProvider>
       </body>
     </html>
   )

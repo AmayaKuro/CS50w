@@ -1,12 +1,13 @@
 "use client"
 import { useSession } from "next-auth/react"
+import { useState } from "react"
 
+import { useConversastion } from "@/assets/providers/conversation"
 import { Button as SignOutButton } from "@/components/signOutButton.component"
-import React, { useState } from "react"
 
 export default function Chat() {
-    const { data, update } = useSession()
-    const [title, setTitle] = useState("scam")
+    const { data: session } = useSession()
+    const { state: { conversations } } = useConversastion()
 
     return (
         <div>
