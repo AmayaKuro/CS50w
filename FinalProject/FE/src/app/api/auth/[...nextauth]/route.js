@@ -58,12 +58,17 @@ const handler = NextAuth({
                 token["name"] = backendResponse.user.name;
                 token["access_token"] = backendResponse.access;
                 token["refresh_token"] = backendResponse.refresh;
-                token["ref"] = getCurrentEpochTime() + process.env.BACKEND_ACCESS_TOKEN_LIFETIME;
+                token["access_ref"] = getCurrentEpochTime() + parseInt(process.env.BACKEND_ACCESS_TOKEN_LIFETIME);
+                token["refresh_ref"] = getCurrentEpochTime() + parseInt(process.env.BACKEND_REFRESH_TOKEN_LIFETIME);
                 return token;
             }
 
+            // If refresh token is expired, return user as null (sign out)
+            if (getCurrentEpochTime() > token["refresh_ref"]) return null;
+
+
             // Refresh the backend access token if it has expired
-            if (getCurrentEpochTime() > token["ref"]) {
+            if (getCurrentEpochTime() > token["access_ref"]) {
                 const payload = {
                     refresh: token["refresh_token"],
                 };
@@ -87,7 +92,7 @@ const handler = NextAuth({
 
                 // else, update the token
                 token["access_token"] = data.access;
-                token["ref"] = getCurrentEpochTime() + process.env.BACKEND_ACCESS_TOKEN_LIFETIME;
+                token["access_ref"] = getCurrentEpochTime() + parseInt(process.env.BACKEND_ACCESS_TOKEN_LIFETIME);
             }
 
             return token;

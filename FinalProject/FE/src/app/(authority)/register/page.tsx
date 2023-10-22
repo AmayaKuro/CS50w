@@ -1,22 +1,16 @@
 "use client"
 import Link from 'next/link'
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
-import zxcvbn from 'zxcvbn'
+import { type T, passwordChecker } from '@/assets/authenticate/password'
 
-import { TextField, Button, LinearProgress } from '@mui/material'
+import { TextField, LinearProgress } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { motion } from "framer-motion";
 
-import styles from '../../css/authenticate.module.css'
+import styles from '@/css/authenticate.module.css'
 
-interface T {
-    score: number,
-    text: string,
-    color: "error" | "warning" | "info" | "success" | undefined,
-
-}
 
 export default function Register() {
     const [username, setUsername] = useState('')
@@ -29,51 +23,10 @@ export default function Register() {
     })
     const [loading, setLoading] = useState(false)
 
-    const strength = useMemo((): T => {
-        if (password === '') {
-            return {
-                score: 0,
-                text: "~~~~",
-                color: undefined,
-            };
-        }
-
-        switch (zxcvbn(password).score) {
-            case 0:
-                return {
-                    score: 0,
-                    text: "Very Weak",
-                    color: "error",
-                };
-            case 1:
-                return {
-                    score: 1,
-                    text: "Weak",
-                    color: "error",
-                };
-            case 2:
-                return {
-                    score: 2,
-                    text: "Fair",
-                    color: "warning",
-                };
-            case 3:
-                return {
-                    score: 3,
-                    text: "Good",
-                    color: "info",
-                };
-            case 4:
-                return {
-                    score: 4,
-                    text: "Strong",
-                    color: "success",
-                };
-        }
-    }, [password])
-
     const router = useRouter();
 
+    const strength = useMemo((): T =>
+        passwordChecker(password), [password])
 
     const addError = useCallback((key: string, value: string) => {
         setError((errors) => {

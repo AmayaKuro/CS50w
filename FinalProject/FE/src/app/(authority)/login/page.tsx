@@ -1,38 +1,33 @@
 "use client"
 import { signIn } from "next-auth/react";
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-import { TextField, Button } from '@mui/material'
+import { TextField } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { motion } from "framer-motion";
 
-import styles from '../../css/authenticate.module.css'
+import styles from '@/css/authenticate.module.css'
 
 export default function Login() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const [disabled, setDisabled] = useState(false)
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
-    
-    const router = useRouter()
-    
-    // import all from react (useEffect here)
-    useEffect(() => {
-        setError('');
-        if (username === '' || password === '') {
-            setDisabled(true);
-        }
-        else {
-            setDisabled(false);
-        }
-    }, [username, password])
 
-    const login = async (e: React.FormEvent<HTMLFormElement>) => {
+    const router = useRouter()
+
+    const login = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (disabled) return;
+
+        // Prevent empty fields
+        if (!username || !password) {
+            setError('Please fill in all fields');
+            return;
+        }
+
+        setError('');
         setLoading(true);
 
         const res = await signIn('credentials', {
@@ -49,7 +44,7 @@ export default function Login() {
             router.push('/chats');
         }
 
-    }
+    }, [username, password])
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -78,7 +73,11 @@ export default function Login() {
                             {error !== "" && <div className={styles.formGroup} style={{ color: "#f53e3e" }}>
                                 {error}
                             </div>}
-                            <LoadingButton className={styles.formGroup} type="submit" loading={loading} disabled={disabled}>
+                            <LoadingButton
+                                className={styles.formGroup}
+                                type="submit"
+                                loading={loading}
+                                disabled={!username || !password}>
                                 Log in
                             </LoadingButton>
                         </div>
