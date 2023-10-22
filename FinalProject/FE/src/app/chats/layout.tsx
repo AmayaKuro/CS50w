@@ -1,4 +1,5 @@
 import { Navbar, TitleContainer } from '@/components/navbar'
+import { ConversationProvider } from '@/assets/providers/conversation'
 
 
 export default function ChatLayout({
@@ -8,14 +9,13 @@ export default function ChatLayout({
 }) {
 
     return (
-        <div>
-            {/* TODO: put nav bar contain conversations title, main board display conversation here */}
+        <ConversationProvider>
             <Navbar>
                 <TitleContainer />
             </Navbar>
             <main>
                 {children}
             </main>
-        </div>
+        </ConversationProvider>
     )
 }

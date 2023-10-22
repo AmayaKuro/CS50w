@@ -66,7 +66,6 @@ const handler = NextAuth({
             // If refresh token is expired, return user as null (sign out)
             if (getCurrentEpochTime() > token["refresh_ref"]) return null;
 
-
             // Refresh the backend access token if it has expired
             if (getCurrentEpochTime() > token["access_ref"]) {
                 const payload = {
