@@ -38,27 +38,29 @@ class UserAndTokenObtainPairView(TokenViewBase):
 @permission_classes([IsAuthenticated])
 def requestConversation(request):
     if request.method == "GET":
-        conversations = Conversations.objects.values("conversation_id", "title").filter(
-            owner=request.user
+        conversations = (
+            Conversations.objects.values("conversation_id", "title")
+            .filter(owner=request.user)
+            .order_by("pk")
         )
         serializer = ConversationSerializer(conversations, many=True)
 
         return Response(serializer.data)
 
     elif request.method == "POST":
-        messages = request.POST.get("messages")
+        message = request.POST.get("message")
 
         conversation_key = None
 
         # Check if input is valid
-        if not messages:
+        if not message:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         #  Create new conversation by not providing conversation_id
         try:
             chat = ChatCompletion.create(
                 provider=Bard,
-                messages=messages,
+                message=message,
             )
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -77,7 +79,7 @@ def requestConversation(request):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Save response that came with the conversation
-        if not saveResponse(conversation_key, chat):
+        if not saveResponse(conversation_key, message, chat):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(chat, status=status.HTTP_201_CREATED)
@@ -110,9 +112,11 @@ def requestResponse(request):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            responses = Responses.objects.values(
-                "response_id", "choice_id", "log"
-            ).filter(conversation__conversation_id=conversation_id)
+            responses = (
+                Responses.objects.values("response_id", "choice_id", "log")
+                .filter(conversation__conversation_id=conversation_id)
+                .order_by("pk")
+            )
 
             if len(responses) < 1:
                 raise Exception("No responses found")
@@ -123,28 +127,27 @@ def requestResponse(request):
         return Response(serializer.data)
 
     if request.method == "POST":
-        messages = request.POST.get("messages")
+        message = request.POST.get("message")
         conversation_id = request.POST.get("conversation_id")
         response_id = request.POST.get("response_id")
         choice_id = request.POST.get("choice_id")
 
         # Check if input is valid
-        if not messages or not idCheck(conversation_id, response_id, choice_id):
+        if not message or not idCheck(conversation_id, response_id, choice_id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        # Try to get the conversation, if it doesn't exist, throw an error
+        # Try to get the conversation, if it doesn't exist, return 400 status
         try:
             conversation_key = Conversations.objects.get(
                 conversation_id=conversation_id
             )
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
         # Fetch for the response
         try:
             chat = ChatCompletion.create(
                 provider=Bard,
-                messages=messages,
+                message=message,
                 conversation_id=conversation_id,
                 response_id=response_id,
                 choice_id=choice_id,
@@ -152,8 +155,14 @@ def requestResponse(request):
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+        # Get the response and delete the children (replacing the response)
+        # If chat can be created, response_id should exist and be valid, so no need to check
+        response = Responses.objects.get(response_id=response_id)
+        if response:
+            Responses.objects.filter(pk__gt=response.pk).delete()
+
         # Save response
-        if not saveResponse(conversation_key, chat):
+        if not saveResponse(conversation_key, message, chat):
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(chat, status=status.HTTP_201_CREATED)

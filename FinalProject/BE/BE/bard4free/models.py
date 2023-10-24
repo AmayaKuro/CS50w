@@ -56,4 +56,5 @@ class Responses(models.Model):
     conversation = models.ForeignKey(Conversations, on_delete=models.CASCADE, related_name="responses")
     response_id = models.CharField(max_length=64, unique=True, blank=False, null=False)
     choice_id = models.CharField(max_length=64, unique=True, blank=False, null=False)
-    log = models.TextField()
+    message = models.TextField(blank=False, null=False)
+    log = models.TextField(blank=False, null=False)

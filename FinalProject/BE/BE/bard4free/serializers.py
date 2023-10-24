@@ -33,7 +33,7 @@ class UserAndTokenObtainPairSerializer(TokenObtainPairSerializer):
 class ResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Responses
-        fields = ["response_id", "choice_id", "log"]
+        fields = ["response_id", "choice_id", "message", "log"]
 
 
 class ConversationSerializer(serializers.ModelSerializer):
