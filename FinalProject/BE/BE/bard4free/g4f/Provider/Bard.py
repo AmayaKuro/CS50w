@@ -63,13 +63,13 @@ class Bard(AsyncProvider):
     @classmethod
     async def create_async(
         cls,
-        messages: str,
+        message: str,
         conversation_id: str = '',
         response_id: str = '',
         choice_id: str = '',
         **kwargs: Any,
     ) -> str:
-        freq = json.dumps([None, json.dumps([[messages], None, [conversation_id, response_id, choice_id]])])
+        freq = json.dumps([None, json.dumps([[message], None, [conversation_id, response_id, choice_id]])])
 
         intents = '.'.join([
             'assistant',
@@ -167,7 +167,7 @@ class Bard(AsyncProvider):
     def params(cls):
         params = [
             ("model", "str"),
-            ("messages", "str"),
+            ("message", "str"),
             ("stream", "bool"),
             ("proxy", "str"),
         ]

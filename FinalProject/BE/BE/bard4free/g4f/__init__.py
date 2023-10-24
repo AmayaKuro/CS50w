@@ -19,7 +19,7 @@ class ChatCompletion:
     @classmethod
     def create(
         cls,
-        messages: str,
+        message: str,
         provider: type[BaseProvider],
         conversation_id: str = "",
         response_id: str = "",
@@ -27,7 +27,7 @@ class ChatCompletion:
         **kwargs: Any,
     ) -> ChatResponse:
         result = provider.create_completion(
-            messages=messages,
+            message=message,
             conversation_id=conversation_id,
             response_id=response_id,
             choice_id=choice_id,

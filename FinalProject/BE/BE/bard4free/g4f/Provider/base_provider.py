@@ -19,7 +19,7 @@ class BaseProvider(ABC):
     @staticmethod
     @abstractmethod
     def create_completion(
-        messages: str,
+        message: str,
         **kwargs: Any,
     ) -> CreateResult:
         raise NotImplementedError()
@@ -46,7 +46,7 @@ class BaseProvider(ABC):
     def params(cls):
         params = [
             ("model", "str"),
-            ("messages", "list[dict[str, str]]"),
+            ("message", "list[dict[str, str]]"),
             ("stream", "bool"),
         ]
         param = ", ".join([": ".join(p) for p in params])
@@ -68,14 +68,14 @@ class AsyncProvider(BaseProvider):
     @classmethod
     def create_completion(
         cls,
-        messages: str,
+        message: str,
         conversation_id: str = '',
         response_id: str = '',
         choice_id: str = '',
         **kwargs: Any,
     ) -> CreateResult:
         yield asyncio.run(cls.create_async(
-            messages = messages,
+            message = message,
             conversation_id = conversation_id,
             response_id = response_id,
             choice_id = choice_id,
@@ -85,7 +85,7 @@ class AsyncProvider(BaseProvider):
     @staticmethod
     @abstractmethod
     async def create_async(
-        messages: str,
+        message: str,
         conversation_id: str,
         response_id: str,
         choice_id: str,
