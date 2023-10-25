@@ -113,7 +113,7 @@ def requestResponse(request):
 
         try:
             responses = (
-                Responses.objects.values("response_id", "choice_id", "log")
+                Responses.objects.values("response_id", "choice_id", "log", "message")
                 .filter(conversation__conversation_id=conversation_id)
                 .order_by("pk")
             )
