@@ -1,6 +1,8 @@
 import { Navbar, TitleContainer } from '@/components/navbar'
 import { ConversationProvider } from '@/assets/providers/conversation'
 
+import styles from '@/css/main/layout.module.css'
+
 
 export default function ChatLayout({
     children,
@@ -10,12 +12,14 @@ export default function ChatLayout({
 
     return (
         <ConversationProvider>
-            <Navbar>
-                <TitleContainer />
-            </Navbar>
-            <main>
-                {children}
-            </main>
+            <div id={styles.layout}>
+                <Navbar>
+                    <TitleContainer />
+                </Navbar>
+                <main>
+                    {children}
+                </main>
+            </div>
         </ConversationProvider>
     )
 }

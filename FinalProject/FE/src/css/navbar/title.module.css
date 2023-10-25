@@ -1,0 +1,18 @@
+.titleContainer {
+    flex-basis: 1;
+    background-color: #262424;
+    border-radius: 1rem;
+    padding: 1rem;
+}
+
+.newConvContainer {
+    border-bottom: 1px solid #757171;
+    margin-bottom: 1rem;
+}
+
+.newConvBtn {
+    color: inherit;
+    margin: 0 0 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}

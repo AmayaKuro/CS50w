@@ -1,13 +1,13 @@
 const BACKEND_URL = 'http://127.0.0.1:8000/api/'
 
 
-export const fetchAPI = async (url: string, access_token: string, options?: RequestInit) => {
+export const fetchAPI = async (url: string, options?: RequestInit) => {
     try {
         const response = await fetch(`${BACKEND_URL}${url}`, {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${access_token}`,
+                ...options?.headers,
             },
         });
 
