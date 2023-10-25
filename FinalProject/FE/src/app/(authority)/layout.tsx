@@ -1,5 +1,7 @@
-import { getServerSession } from "next-auth"
-import { redirect } from 'next/navigation'
+"use client";
+import { useSession } from 'next-auth/react'; 
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react';
 
 
 export default function AuthenticationLayout({
@@ -7,11 +9,12 @@ export default function AuthenticationLayout({
 }: {
     children: React.ReactNode
 }) {
-
+    const router = useRouter()
+    const { data: session } = useSession();
     // Check if user is logged in
-    getServerSession().then((session) => {
+    useEffect(() => {
         if (session) {
-            redirect('/login')
+            router.push('/chats')
         }
     })
 
