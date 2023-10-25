@@ -1,0 +1,17 @@
+#navbar {
+    display: grid;
+    grid-template-rows: 1.5fr 8fr 1fr;
+    max-width: 20%;
+    min-width: 20%;
+    padding: 0 2rem;
+}
+
+#navHeader img {
+    margin: 0 auto;
+    width: 100px;
+    display: block;
+}
+
+#navFooter {
+    flex-basis: 1;
+}
