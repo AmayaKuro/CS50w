@@ -19,7 +19,7 @@ export const useConversastion = () => useContext(ConversationContext);
 
 export const ConversationProvider = ({ children }: { children: React.ReactNode }) => {
     // Ex: [{title: "title", conversation_id: "conversation_id"}]
-    const [conversations, setConversations] = useState<ConversationProps[]>([{ title: "", conversation_id: "" }]);
+    const [conversations, setConversations] = useState<ConversationProps[]>([]);
 
     const value = { state: { conversations }, dispatch: { setConversations } };
     return (

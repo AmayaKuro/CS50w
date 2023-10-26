@@ -1,5 +1,7 @@
 import React, { ReactNode } from 'react';
 
+import FooterComponent from './footer.component';
+
 import styles from '@/css/navbar/navbar.module.css';
 
 interface P {
@@ -9,11 +11,17 @@ interface P {
 const Navbar: React.FC<P> = ({ children }) => {
     return (
         <nav id={styles.navbar}>
-            <div id={styles.navHeader}>
+            <div className={styles.navHeader}>
                 <img src="/favicon.ico" alt="logo" />
             </div>
-            {children}
-            <div id={styles.navFooter}>signout</div>
+
+            <div className={styles.navBody}>
+                {children}
+            </div>
+
+            <div className={styles.navFooter}>
+                <FooterComponent />
+            </div>
         </nav>
     );
 };
