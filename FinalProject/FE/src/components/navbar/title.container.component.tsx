@@ -1,19 +1,22 @@
 "use client";
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useState, useEffect, useCallback } from 'react';
+
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import AddIcon from '@mui/icons-material/Add';
 import Button from "@mui/material/Button"
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { type ConversationProps, useConversastion } from '@/assets/providers/conversation';
 import { fetchAPI } from '@/assets/fetch/base';
-import { PlusIcon } from "@/assets/mui/icon";
 
 import styles from '@/css/navbar/title.module.css'
 
 
 const TitleContainer: React.FC = () => {
     const { state: { conversations }, dispatch: { setConversations } } = useConversastion();
+    const [loading, setLoading] = useState(true);
     const [hasFetched, setHasFetched] = useState(false);
 
     const { data: session } = useSession();
@@ -32,27 +35,43 @@ const TitleContainer: React.FC = () => {
         }).then((res: ConversationProps[]) => {
             setConversations([...res]);
             setHasFetched(true);
+            setLoading(false);
         });
 
     }, [session, hasFetched]);
 
     return (
-        <div className={styles.titleContainer}>
+        <>
             <div className={styles.newConvContainer}>
-                <Button 
-                className={styles.newConvBtn} 
-                size="large" startIcon={<PlusIcon />} 
-                onClick={() => router.push("/chats")}>New Chat</Button>
+                <Button
+                    className={styles.newConvBtn}
+                    size="large"
+                    startIcon={<AddIcon />}
+                    color='secondary'
+                    onClick={() => router.push("/chats")}>New Chat</Button>
             </div>
 
-            {conversations.map((conversation) => (
-                <div key={conversation.conversation_id}>
-                    <Link href={`/chats/${conversation.conversation_id}`}>
-                        {conversation.title}
-                    </Link>
-                </div>
-            ))}
-        </div>
+            <div className={styles.titleContainer}>
+                {loading &&
+                    <div className={styles.loadingContainer}>
+                        <CircularProgress />
+                    </div>
+                }
+
+                {conversations.map((conversation) => (
+                    <Button
+                        key={conversation.conversation_id}
+                        startIcon={<ChatBubbleOutlineIcon />}
+                        onClick={() => router.push(`/chats/${conversation.conversation_id}`)}
+                        style={{ width: '100%' }}
+                    >
+                        <span style={{ textTransform: 'initial' }}>
+                            {conversation.title}
+                        </span>
+                    </Button>
+                ))}
+            </div>
+        </>
     );
 };
 
