@@ -8,14 +8,14 @@ import AddIcon from '@mui/icons-material/Add';
 import Button from "@mui/material/Button"
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { type ConversationProps, useConversastion } from '@/assets/providers/conversation';
+import { type ConversationProps, useConversation } from '@/assets/providers/conversation';
 import { fetchAPI } from '@/assets/fetch/base';
 
 import styles from '@/css/navbar/title.module.css'
 
 
 const TitleContainer: React.FC = () => {
-    const { state: { conversations }, dispatch: { setConversations } } = useConversastion();
+    const { state: { conversations }, dispatch: { setConversations } } = useConversation();
     const [loading, setLoading] = useState(true);
     const [hasFetched, setHasFetched] = useState(false);
 
