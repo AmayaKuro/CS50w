@@ -1,16 +1,21 @@
 "use client"
 import { useSession } from "next-auth/react"
+import { useState, useEffect } from "react"
+
+import { useConversation } from "@/assets/providers/conversation"
 
 import { Button } from "@/components/signOutButton.component"
-import { useState, useEffect } from "react"
 
 
 export default function Home() {
     const { data, update } = useSession()
 
+    const { dispatch: { setCurrentConversationCallback } } = useConversation();
+
+
     useEffect(() => {
-        document.title = "Bard4Free";
-    }, [])
+        setCurrentConversationCallback("");
+    }, []);
 
     return (
         <div>
