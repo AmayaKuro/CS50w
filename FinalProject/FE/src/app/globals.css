@@ -31,11 +31,7 @@ nav {
   min-width: 48px
 }
 
-:hover::-webkit-scrollbar-thumb {
-  color: #80868b
-}
-
-::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:active {
   color: #5f6368
 }
 
