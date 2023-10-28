@@ -1,14 +1,12 @@
 import React, { ReactNode } from 'react';
 
+import TitleContainer from './title.container.component';
 import FooterComponent from './footer.component';
 
 import styles from '@/css/navbar/navbar.module.css';
 
-interface P {
-    children: ReactNode;
-}
 
-const Navbar: React.FC<P> = ({ children }) => {
+const Navbar: React.FC = () => {
     return (
         <nav id={styles.navbar}>
             <div className={styles.navHeader}>
@@ -16,7 +14,7 @@ const Navbar: React.FC<P> = ({ children }) => {
             </div>
 
             <div className={styles.navBody}>
-                {children}
+                <TitleContainer />
             </div>
 
             <div className={styles.navFooter}>
