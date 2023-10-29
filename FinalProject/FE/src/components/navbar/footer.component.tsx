@@ -42,8 +42,8 @@ const FooterComponent = () => {
                 endIcon={<MoreHorizIcon />}
                 onClick={handleClick}
             >
-                {session?.name
-                    ? <div className={styles.name}>{session?.name}</div>
+                {session?.user?.name
+                    ? <div className={styles.name}>{session?.user?.name}</div>
                     : <span />
                 }
             </Button>
