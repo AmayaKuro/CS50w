@@ -97,8 +97,9 @@ const handler = NextAuth({
             return token;
         },
 
-        async session({ token }) {
-            return token;
+        async session({ token, session }) {
+            session.access_token = token.access_token;
+            return session;
         },
 
     },
