@@ -64,7 +64,12 @@ const FooterComponent = () => {
                     'aria-labelledby': styles.infoButton,
                 }}
             >
-                <MenuItem onClick={handleClose} href="https://github.com/AmayaKuro/CS50w/tree/main/FinalProject">
+                <MenuItem
+                    onClick={e => {
+                        handleClose();
+                        window.open("https://github.com/AmayaKuro/CS50w/tree/main/FinalProject")
+                    }}
+                >
                     <ListItemIcon>
                         <GitHubIcon />
                     </ListItemIcon>
