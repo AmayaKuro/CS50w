@@ -1,16 +1,9 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials"
 
-const getCurrentEpochTime = () => {
-    return Math.floor(new Date().getTime() / 1000);
-};
-
-const SIGN_IN_HANDLERS = {
-    "credentials": async (user, account, profile, email, credentials) => {
-        return true;
-    },
-};
-const SIGN_IN_PROVIDERS = Object.keys(SIGN_IN_HANDLERS);
+import { BEfetch } from "@/assets/fetch";
+import { refreshAccessToken, getCurrentEpochTime } from "@/assets/authenticate/token";
+import * as env from "@/assets/env";
 
 
 const handler = NextAuth({
@@ -30,7 +23,7 @@ const handler = NextAuth({
                     password: credentials?.password,
                 }
 
-                const res = await fetch(process.env.NEXTAUTH_BACKEND_URL + "/login", {
+                const res = await fetch(env.BACKEND_URL + "/login", {
                     method: 'POST',
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
@@ -52,46 +45,32 @@ const handler = NextAuth({
         }),
     ],
     callbacks: {
-        async jwt({ token, user, account }) {
-            if (account && user) {
-                let backendResponse = account.provider === "credentials" ? user : account.meta;
-                token["name"] = backendResponse.user.name;
-                token["access_token"] = backendResponse.access;
-                token["refresh_token"] = backendResponse.refresh;
-                token["access_ref"] = getCurrentEpochTime() + parseInt(process.env.BACKEND_ACCESS_TOKEN_LIFETIME);
-                token["refresh_ref"] = getCurrentEpochTime() + parseInt(process.env.BACKEND_REFRESH_TOKEN_LIFETIME);
+        async jwt({ token, user }) {
+            if (user) {
+                token.name = user.user.name;
+                token.access_token = user.access;
+                token.refresh_token = user.refresh;
+                // Access token has a lifetime of 29 minutes
+                token.access_ref = getCurrentEpochTime() + env.BACKEND_ACCESS_TOKEN_LIFETIME;
+                // token["refresh_ref"] = getCurrentEpochTime() + parseInt(process.env.BACKEND_REFRESH_TOKEN_LIFETIME);
                 return token;
             }
 
-            // If refresh token is expired, return user as null (sign out)
-            if (getCurrentEpochTime() > token["refresh_ref"]) return null;
+            // TODO: return null is not accepted by next-auth, learn other ways to sign out
+            // // If refresh token is expired, return user as null (sign out)
+            // if (getCurrentEpochTime() > token["refresh_ref"]) return null;
 
             // Refresh the backend access token if it has expired
-            if (getCurrentEpochTime() > token["access_ref"]) {
+            if (getCurrentEpochTime() > token.access_ref) {
                 const payload = {
                     refresh: token["refresh_token"],
                 };
 
-                const response = await fetch(process.env.NEXTAUTH_BACKEND_URL + "/token/refresh/", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                });
-                const data = await response.json();
-
-                // If cannnot get a new access token, sign out
-                if (!response.ok) {
-                    await fetch(process.env.NEXTAUTH_URL + "/api/auth/signout", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                    });
-
-                    throw new Error(data?.detail ?? "Cannot authenticate");
-                }
+                const response = await refreshAccessToken(token["refresh_token"]);
 
                 // else, update the token
-                token["access_token"] = data.access;
-                token["access_ref"] = getCurrentEpochTime() + parseInt(process.env.BACKEND_ACCESS_TOKEN_LIFETIME);
+                token["access_token"] = response.access;
+                token["access_ref"] = getCurrentEpochTime() + env.BACKEND_ACCESS_TOKEN_LIFETIME;
             }
 
             return token;
@@ -99,6 +78,8 @@ const handler = NextAuth({
 
         async session({ token, session }) {
             session.access_token = token.access_token;
+            session.expires = new Date(token.access_ref).toTimeString();
+            session.user.name = token.name;
             return session;
         },
 
@@ -111,9 +92,8 @@ const handler = NextAuth({
                 refresh: messages.token["refresh_token"],
             };
 
-            await fetch(process.env.NEXTAUTH_BACKEND_URL + "/signout", {
+            await BEfetch("/signout", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
         },
@@ -123,10 +103,9 @@ const handler = NextAuth({
         signIn: "/login",
     },
 
-    secret: process.env.SECRET,
     session: {
         strategy: 'jwt',
-        maxAge: parseInt(process.env.BACKEND_REFRESH_TOKEN_LIFETIME),
+        maxAge: env.BACKEND_REFRESH_TOKEN_LIFETIME,
     },
 
 

@@ -1,7 +1,6 @@
-const BACKEND_URL = 'http://127.0.0.1:8000/api/'
+import { BACKEND_URL } from './env';
 
-
-export const fetchAPI = async (url: string, options?: RequestInit) => {
+export const BEfetch = async (url: string, options?: RequestInit) => {
     try {
         const response = await fetch(`${BACKEND_URL}${url}`, {
             ...options,
