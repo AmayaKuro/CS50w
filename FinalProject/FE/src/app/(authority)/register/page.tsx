@@ -70,6 +70,13 @@ export default function Register() {
                 password: password,
                 callbackUrl: 'http://localhost:3000/chats',
             })
+
+            // If signin failed, redirect to login page
+            if (signin?.error) {
+                router.push('/login');
+                setLoading(false);
+                return;
+            }
         }
         else {
             addError('extra', 'Unable to register');

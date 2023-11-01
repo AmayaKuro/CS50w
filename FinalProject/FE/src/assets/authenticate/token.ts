@@ -2,15 +2,17 @@ import { BEfetch } from "../fetch";
 import { NEXTAUTH_URL } from "../env"
 
 export const refreshAccessToken = async (refreshToken: string) => {
-    var response;
     const payload = {
         refresh: refreshToken,
     };
+    
     try {
-        response = await BEfetch("/token/refresh/", {
+        const response = await BEfetch("/token/refresh/", {
             method: "POST",
             body: JSON.stringify(payload),
         });
+
+        return response;
     }
     // If cannnot get a new access token, sign out
     catch (e) {
@@ -21,8 +23,6 @@ export const refreshAccessToken = async (refreshToken: string) => {
 
         throw new Error("Cannot authenticate");
     }
-
-    return response;
 };
 
 
