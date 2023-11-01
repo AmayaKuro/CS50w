@@ -9,13 +9,13 @@ import Button from "@mui/material/Button"
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { type ConversationProps, useConversation } from '@/assets/providers/conversation';
-import { fetchAPI } from '@/assets/fetch/base';
+import { BEfetch } from '@/assets/fetch';
 
 import styles from '@/css/navbar/title.module.css'
 
 
 const TitleContainer: React.FC = () => {
-    const { state: { conversations }, dispatch: { setConversations } } = useConversation();
+    const { state: { conversations, currentConversationID }, dispatch: { setConversations } } = useConversation();
     const [loading, setLoading] = useState(true);
     const [hasFetched, setHasFetched] = useState(false);
 
@@ -28,7 +28,7 @@ const TitleContainer: React.FC = () => {
             return
         }
 
-        fetchAPI('conversations', {
+        BEfetch('/conversations', {
             headers: {
                 Authorization: `Bearer ${session.access_token}`,
             },
@@ -64,6 +64,7 @@ const TitleContainer: React.FC = () => {
                         startIcon={<ChatBubbleOutlineIcon />}
                         onClick={() => router.push(`/chats/${conversation.conversation_id}`)}
                         style={{ width: '100%' }}
+                        className={(conversation.conversation_id === currentConversationID) ? styles.selected : undefined}
                     >
                         <span style={{ textTransform: 'initial' }}>
                             {conversation.title}

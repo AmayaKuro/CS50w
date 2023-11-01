@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import Markdown from 'markdown-to-jsx';
 
-import { fetchAPI } from "@/assets/fetch/base";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+
+import { BEfetch } from "@/assets/fetch";
+
+import styles from "@/css/main/chat.module.css";
+
 
 type Response = {
     response_id: string;
@@ -11,37 +17,46 @@ type Response = {
 };
 
 
-
 const Chat: React.FC<{ conversation_id: string }> = ({ conversation_id }) => {
     const [responses, setResponses] = useState<Response[]>([]);
     const [hasFetched, setHasFetched] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const { data: session } = useSession();
 
 
-    // Allow fetching of responses when conversation_id changes
     useEffect(() => {
-        setHasFetched(false);
-    }, [conversation_id]);
-
-    useEffect(() => {
-        if (session && !hasFetched) {
-            fetchAPI(`response?conversation_id=${conversation_id}`, {
+        if (loading) return;
+        
+        if (session?.access_token && !hasFetched) {
+            setLoading(true);
+            BEfetch(`/response?conversation_id=${conversation_id}`, {
                 headers: {
                     Authorization: `Bearer ${session.access_token}`
                 },
-            }).then((res: Response[]) => setResponses(res))
+            }).then((res: Response[]) => {
+                setResponses(res);
+                setHasFetched(true);
+                setLoading(false);
+            })
         }
-    }, [session, hasFetched]);
+    }, [session?.access_token, hasFetched, loading]);
 
     return (
-        <div>
+        <>
             {responses.map((response) => (
                 <div key={response.response_id}>
-                    <div dangerouslySetInnerHTML={{ __html: response.log }} />
+                    <div className={styles.userMessage}>
+                        <AccountCircle />
+                        {response.message}
+                    </div>
+                    <div className={styles.markdownContainer}>
+                        <Markdown children={response.log} />
+                    </div>
+
                 </div>
             ))}
-        </div>
+        </>
     );
 };
 
