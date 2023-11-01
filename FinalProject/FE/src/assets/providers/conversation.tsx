@@ -11,7 +11,7 @@ export type ConversationProps = {
 type ConversationContextType = {
     state: {
         conversations: ConversationProps[];
-        current_conversation: ConversationProps;
+        currentConversationID: string;
     };
     dispatch: Record<string, Dispatch<SetStateAction<any>>> | Record<string, Function>;
 };
@@ -24,31 +24,31 @@ export const useConversation = () => useContext(ConversationContext);
 export const ConversationProvider = ({ children }: { children: React.ReactNode }) => {
     // Ex: [{title: "title", conversation_id: "conversation_id"}]
     const [conversations, setConversations] = useState<ConversationProps[]>([]);
-    const [current_conversation, setCurrentConversation] = useState<ConversationProps>({ title: "", conversation_id: "" });
+    const [currentConversationID, setCurrentConversationID] = useState<string>("");
 
     // TODO: Pass this to the chats page
-    const setCurrentConversationCallback = useCallback((conversation_id: string) => {
+    const setCurrentConversationIDCallback = useCallback((conversation_id: string) => {
         // If conversation_id is empty, it's homepage
         // else, it's a conversation page
         if (conversation_id) {
             const conversation = conversations.find((conversation) => conversation.conversation_id === conversation_id);
             if (conversation) {
-                setCurrentConversation(conversation);
+                setCurrentConversationID(conversation.conversation_id);
                 document.title = `Chat: ${conversation.title}`;
             }
         }
         else {
-            setCurrentConversation({ title: "", conversation_id: "" });
+            setCurrentConversationID("");
             document.title = `Bard4Free`;
         }
-    }, [conversations, setCurrentConversation]);
+    }, [conversations, setCurrentConversationID]);
 
     const value = {
         state: {
             conversations: conversations,
-            current_conversation: current_conversation,
+            currentConversationID: currentConversationID,
         },
-        dispatch: { setConversations, setCurrentConversationCallback }
+        dispatch: { setConversations, setCurrentConversationIDCallback }
     };
 
     return (
