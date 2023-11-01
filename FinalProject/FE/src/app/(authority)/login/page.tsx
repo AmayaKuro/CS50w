@@ -1,7 +1,7 @@
 "use client"
 import { signIn } from "next-auth/react";
 import { useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 import { TextField } from '@mui/material'
@@ -17,6 +17,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false)
 
     const router = useRouter()
+    const searchParams = useSearchParams()
 
     const login = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -41,7 +42,7 @@ export default function Login() {
             setError('Unable to sign in');
             setLoading(false);
         } else {
-            router.push('/chats');
+            router.push(searchParams.get('callbackUrl') || '/chats');
         }
 
     }, [username, password])

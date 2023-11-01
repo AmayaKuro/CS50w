@@ -52,20 +52,11 @@ const handler = NextAuth({
                 token.refresh_token = user.refresh;
                 // Access token has a lifetime of 29 minutes
                 token.access_ref = getCurrentEpochTime() + env.BACKEND_ACCESS_TOKEN_LIFETIME;
-                // token["refresh_ref"] = getCurrentEpochTime() + parseInt(process.env.BACKEND_REFRESH_TOKEN_LIFETIME);
                 return token;
             }
 
-            // TODO: return null is not accepted by next-auth, learn other ways to sign out
-            // // If refresh token is expired, return user as null (sign out)
-            // if (getCurrentEpochTime() > token["refresh_ref"]) return null;
-
             // Refresh the backend access token if it has expired
             if (getCurrentEpochTime() > token.access_ref) {
-                const payload = {
-                    refresh: token["refresh_token"],
-                };
-
                 const response = await refreshAccessToken(token["refresh_token"]);
 
                 // else, update the token
