@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials"
 
-import { BEfetch } from "@/assets/fetch";
+import { BEfetch } from "@/assets/fetch/BEfetch";
 import { refreshAccessToken, getCurrentEpochTime } from "@/assets/authenticate/token";
 import * as env from "@/assets/env";
 
