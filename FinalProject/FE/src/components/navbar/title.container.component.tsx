@@ -40,6 +40,15 @@ const TitleContainer: React.FC = () => {
 
     }, [session, hasFetched]);
 
+    const handleTitleSelect = useCallback((conversation_id: string) => {
+        if (currentConversationID == conversation_id) {
+            return {
+                className: styles.selected,
+                disabled: true,
+            }
+        }
+    }, [currentConversationID]);
+
     return (
         <>
             <div className={styles.newConvContainer}>
@@ -64,7 +73,7 @@ const TitleContainer: React.FC = () => {
                         startIcon={<ChatBubbleOutlineIcon />}
                         onClick={() => router.push(`/chats/${conversation.conversation_id}`)}
                         style={{ width: '100%' }}
-                        className={(conversation.conversation_id === currentConversationID) ? styles.selected : undefined}
+                        {...handleTitleSelect(conversation.conversation_id)}
                     >
                         <span style={{ textTransform: 'initial' }}>
                             {conversation.title}

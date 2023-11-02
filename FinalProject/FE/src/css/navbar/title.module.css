@@ -19,3 +19,8 @@
     justify-content: start;
     text-align: start;
 }
+
+.titleContainer .selected {
+    background-color: #ebebeb;
+    color: #646060;
+}
