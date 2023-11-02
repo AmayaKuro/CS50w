@@ -16,7 +16,7 @@ export const refreshAccessToken = async (refreshToken: string) => {
     }
     // If cannnot get a new access token, sign out
     catch (e) {
-        await fetch(NEXTAUTH_URL + "/auth/signout", {
+        await fetch(NEXTAUTH_URL + "/api/auth/signout", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
         });
