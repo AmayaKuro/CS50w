@@ -1,4 +1,4 @@
-import { BACKEND_URL } from './env';
+import { BACKEND_URL } from '../env';
 
 export const BEfetch = async (url: string, options?: RequestInit) => {
     try {

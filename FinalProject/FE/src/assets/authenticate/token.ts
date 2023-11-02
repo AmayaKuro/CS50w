@@ -1,4 +1,4 @@
-import { BEfetch } from "../fetch";
+import { BEfetch } from "../fetch/BEfetch";
 import { NEXTAUTH_URL } from "../env"
 
 export const refreshAccessToken = async (refreshToken: string) => {
@@ -21,7 +21,8 @@ export const refreshAccessToken = async (refreshToken: string) => {
             headers: { "Content-Type": "application/json" },
         });
 
-        throw new Error("Cannot authenticate");
+        // Throw error can lead to error in app
+        // throw new Error("Cannot authenticate");
     }
 };
 

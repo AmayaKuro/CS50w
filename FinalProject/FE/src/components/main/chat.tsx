@@ -4,7 +4,7 @@ import Markdown from 'markdown-to-jsx';
 
 import AccountCircle from "@mui/icons-material/AccountCircle";
 
-import { BEfetch } from "@/assets/fetch";
+import { BEfetch } from "@/assets/fetch/BEfetch";
 
 import styles from "@/css/main/chat.module.css";
 
