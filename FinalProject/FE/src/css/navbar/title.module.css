@@ -15,12 +15,18 @@
     margin: 0 auto;
 }
 
+.titleContainer {
+    overflow-y: auto;
+    height: 100%;
+}
+
 .titleContainer button {
     justify-content: start;
     text-align: start;
+    overflow-y: auto;
 }
 
 .titleContainer .selected {
     background-color: #ebebeb;
-    color: #646060;
+    color: #333232;
 }
