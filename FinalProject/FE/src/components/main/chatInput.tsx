@@ -1,10 +1,13 @@
 "use client";
 import { useState, useCallback } from "react";
 
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
+import InputBase from '@mui/material/InputBase';
+import IconButton from "@mui/material/IconButton";
+import SendIcon from '@mui/icons-material/Send';
 
 import { useConversation } from "@/assets/providers/conversation";
+
+import styles from "@/css/main/chatInput.module.css";
 
 
 export default function ChatInput() {
@@ -16,18 +19,24 @@ export default function ChatInput() {
         setMessage("");
     }, [message]);
     return (
-        <>
-            <TextField
+        <div className={styles.inputHolder}>
+            <InputBase
                 value={message}
+                placeholder="Type a message"
+                multiline
+                maxRows={5}
+                minRows={2}
+                className={styles.textField}
+                autoComplete="true"
                 onChange={(e) => setMessage(e.currentTarget.value)}
-                onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                        sendMessage();
-                    }
-                }}
             />
-            <Button onClick={sendMessage}>Send</Button>
-        </>
+            <IconButton
+                children={<SendIcon />}
+                className={styles.submitButton}
+                onClick={sendMessage}
+            />
+
+        </div>
 
     )
 }

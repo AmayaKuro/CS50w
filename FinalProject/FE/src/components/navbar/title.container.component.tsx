@@ -9,7 +9,7 @@ import Button from "@mui/material/Button"
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { type ConversationProps, useConversation } from '@/assets/providers/conversation';
-import { BEfetch } from '@/assets/fetch';
+import { BEfetch } from '@/assets/fetch/BEfetch';
 
 import styles from '@/css/navbar/title.module.css'
 

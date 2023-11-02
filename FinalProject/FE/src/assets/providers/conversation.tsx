@@ -1,6 +1,5 @@
 "use client";
-import { Dispatch, SetStateAction, createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/router';
+import { Dispatch, SetStateAction, createContext, useContext, useState } from 'react';
 
 
 export type ConversationProps = {
@@ -8,12 +7,21 @@ export type ConversationProps = {
     conversation_id: string;
 };
 
+export type CreateResponseProps = {
+    conversation_id: string;
+    response_id: string;
+    choice_id: string;
+};
+
 type ConversationContextType = {
     state: {
         conversations: ConversationProps[];
-        currentConversationID: string;
+        currentConversationID: CreateResponseProps;
     };
-    dispatch: Record<string, Dispatch<SetStateAction<any>>> | Record<string, Function>;
+    dispatch: {
+        setConversations: Dispatch<SetStateAction<ConversationProps[]>>;
+        setCurrentResponseProps: Dispatch<SetStateAction<CreateResponseProps>>;
+    };
 };
 
 
@@ -24,31 +32,14 @@ export const useConversation = () => useContext(ConversationContext);
 export const ConversationProvider = ({ children }: { children: React.ReactNode }) => {
     // Ex: [{title: "title", conversation_id: "conversation_id"}]
     const [conversations, setConversations] = useState<ConversationProps[]>([]);
-    const [currentConversationID, setCurrentConversationID] = useState<string>("");
-
-    // TODO: Pass this to the chats page
-    const setCurrentConversationIDCallback = useCallback((conversation_id: string) => {
-        // If conversation_id is empty, it's homepage
-        // else, it's a conversation page
-        if (conversation_id) {
-            const conversation = conversations.find((conversation) => conversation.conversation_id === conversation_id);
-            if (conversation) {
-                setCurrentConversationID(conversation.conversation_id);
-                document.title = `Chat: ${conversation.title}`;
-            }
-        }
-        else {
-            setCurrentConversationID("");
-            document.title = `Bard4Free`;
-        }
-    }, [conversations, setCurrentConversationID]);
+    const [currentResponseProps, setCurrentResponseProps] = useState<CreateResponseProps>({ conversation_id: "", response_id: "", choice_id: "" });
 
     const value = {
         state: {
             conversations: conversations,
-            currentConversationID: currentConversationID,
+            currentConversationID: currentResponseProps,
         },
-        dispatch: { setConversations, setCurrentConversationIDCallback }
+        dispatch: { setConversations, setCurrentResponseProps }
     };
 
     return (
