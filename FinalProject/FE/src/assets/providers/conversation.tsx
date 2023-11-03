@@ -2,6 +2,15 @@
 import { Dispatch, SetStateAction, createContext, useContext, useState } from 'react';
 
 
+// This is used for the chat fetching
+export type gettingResponseProps = {
+    response_id: string;
+    choice_id: string;
+    message: string;
+    log: string;
+};
+
+// This is used for passing context to the chatInput
 export type ConversationProps = {
     title: string;
     conversation_id: string;
@@ -16,7 +25,7 @@ export type CreateResponseProps = {
 type ConversationContextType = {
     state: {
         conversations: ConversationProps[];
-        currentConversationID: CreateResponseProps;
+        currentResponseProps: CreateResponseProps;
     };
     dispatch: {
         setConversations: Dispatch<SetStateAction<ConversationProps[]>>;
@@ -37,7 +46,7 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
     const value = {
         state: {
             conversations: conversations,
-            currentConversationID: currentResponseProps,
+            currentResponseProps: currentResponseProps,
         },
         dispatch: { setConversations, setCurrentResponseProps }
     };

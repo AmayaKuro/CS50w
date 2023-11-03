@@ -12,7 +12,7 @@ import styles from "@/css/main/chatInput.module.css";
 
 export default function ChatInput() {
     const [message, setMessage] = useState("");
-    const { state: { currentConversationID } } = useConversation();
+    const { state: { currentResponseProps } } = useConversation();
 
 
     const sendMessage = useCallback(() => {

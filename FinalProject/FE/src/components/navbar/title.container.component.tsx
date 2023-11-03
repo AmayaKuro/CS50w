@@ -15,7 +15,7 @@ import styles from '@/css/navbar/title.module.css'
 
 
 const TitleContainer: React.FC = () => {
-    const { state: { conversations, currentConversationID }, dispatch: { setConversations } } = useConversation();
+    const { state: { conversations, currentResponseProps }, dispatch: { setConversations } } = useConversation();
     const [loading, setLoading] = useState(true);
     const [hasFetched, setHasFetched] = useState(false);
 
@@ -41,13 +41,13 @@ const TitleContainer: React.FC = () => {
     }, [session, hasFetched]);
 
     const handleTitleSelect = useCallback((conversation_id: string) => {
-        if (currentConversationID == conversation_id) {
+        if (currentResponseProps.conversation_id == conversation_id) {
             return {
                 className: styles.selected,
                 disabled: true,
             }
         }
-    }, [currentConversationID]);
+    }, [currentResponseProps]);
 
     return (
         <>
