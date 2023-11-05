@@ -3,22 +3,22 @@ import { useEffect, useCallback, useState } from "react"
 import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 
-import { type ConversationProps, useConversation, CreateResponseProps, gettingResponseProps } from "@/assets/providers/conversation"
+import { type FetchingResponseProps, useConversation, } from "@/assets/providers/conversation"
 import { BEfetch } from "@/assets/fetch/BEfetch"
 import Chat from "@/components/main/chat"
 
 
 export default function Chats() {
-    const [responses, setResponses] = useState<gettingResponseProps[]>([]);
+    const { state: { conversations, responses, creating }, dispatch: { setCurrentResponseProps, setResponses } } = useConversation();
     const [hasFetched, setHasFetched] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const { data: session } = useSession();
-    const { state: { conversations }, dispatch: { setCurrentResponseProps } } = useConversation();
 
     const param = useParams();
     const conversation_id = (param as { conversation_id: string }).conversation_id;
 
+    // This will always set current response props to the last response when responses state changes
     useEffect(() => {
         // Match the current conversation_id to the conversation title
         const conversation = conversations.find((conversation) => conversation.conversation_id === conversation_id);
@@ -42,7 +42,7 @@ export default function Chats() {
                 headers: {
                     Authorization: `Bearer ${session.access_token}`
                 },
-            }).then((res: gettingResponseProps[]) => {
+            }).then((res: FetchingResponseProps[]) => {
                 setResponses(res);
                 setHasFetched(true);
                 setLoading(false);
@@ -53,11 +53,10 @@ export default function Chats() {
 
     return (
         <>
-            {(loading) ? <div>Loading...</div> : null}
             <Chat
-                key={conversation_id}
                 responses={responses}
             />
+            {(loading) ? <div>Loading...</div> : null}
         </>
 
     )
