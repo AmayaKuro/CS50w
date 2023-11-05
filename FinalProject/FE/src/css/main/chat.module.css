@@ -8,3 +8,7 @@
     border-radius: 1rem;
     padding: 1rem;
 }
+
+.markdownContainer:last-child {
+    margin-bottom: 2rem;    
+}
