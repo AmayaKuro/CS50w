@@ -1,5 +1,6 @@
-from django.shortcuts import render
+import json
 
+from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import (
@@ -14,7 +15,7 @@ from rest_framework.exceptions import ValidationError
 from .g4f import ChatCompletion
 from .g4f.Provider.Bard import Bard
 
-from .models import Conversations, Responses, User
+from .models import Conversations, Responses
 from .serializers import *
 from .utils import *
 
@@ -48,9 +49,13 @@ def requestConversation(request):
         return Response(serializer.data)
 
     elif request.method == "POST":
-        message = request.POST.get("message")
-
-        conversation_key = None
+        # Get the message from the request since its content type is application/json not multipart/form-data
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            message = data["message"]
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        # conversation_key = None
 
         # Check if input is valid
         if not message:
@@ -74,7 +79,7 @@ def requestConversation(request):
         # Save conversation before saving response
         serializer = ConversationSerializer(data=data)
         if serializer.is_valid():
-            conversation_key = serializer.save(owner=request.user)
+            conversation_key: Conversations = serializer.save(owner=request.user)
         else:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -85,7 +90,11 @@ def requestConversation(request):
         return Response(chat, status=status.HTTP_201_CREATED)
 
     elif request.method == "DELETE":
-        conversation_id = request.POST.get("conversation_id")
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            conversation_id = data["conversation_id"]
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         if not idCheck(conversation_id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -110,7 +119,6 @@ def requestResponse(request):
         conversation_id = request.GET.get("conversation_id")
         if not idCheck(conversation_id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-
         try:
             responses = (
                 Responses.objects.values("response_id", "choice_id", "log", "message")
@@ -127,10 +135,15 @@ def requestResponse(request):
         return Response(serializer.data)
 
     if request.method == "POST":
-        message = request.POST.get("message")
-        conversation_id = request.POST.get("conversation_id")
-        response_id = request.POST.get("response_id")
-        choice_id = request.POST.get("choice_id")
+        # Get the message from the request since its content type is application/json not multipart/form-data
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+            message = data["message"]
+            conversation_id = data["conversation_id"]
+            response_id = data["response_id"]
+            choice_id = data["choice_id"]
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Check if input is valid
         if not message or not idCheck(conversation_id, response_id, choice_id):
