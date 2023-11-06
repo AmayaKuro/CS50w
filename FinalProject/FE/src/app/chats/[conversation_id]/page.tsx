@@ -3,13 +3,13 @@ import { useEffect, useCallback, useState } from "react"
 import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 
-import { type FetchingResponseProps, useConversation, } from "@/assets/providers/conversation"
+import { type FetchResponseProps, useConversation, } from "@/assets/providers/conversation"
 import { BEfetch } from "@/assets/fetch/BEfetch"
 import Chat from "@/components/main/chat"
 
 
 export default function Chats() {
-    const { state: { conversations, responses, creating }, dispatch: { setCurrentResponseProps, setResponses } } = useConversation();
+    const { state: { conversationTitles, responses, creating }, dispatch: { setCurrentResponseProps, setResponses } } = useConversation();
     const [hasFetched, setHasFetched] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -21,7 +21,7 @@ export default function Chats() {
     // This will always set current response props to the last response when responses state changes
     useEffect(() => {
         // Match the current conversation_id to the conversation title
-        const conversation = conversations.find((conversation) => conversation.conversation_id === conversation_id);
+        const conversation = conversationTitles.find((conversationTitle) => conversationTitle.conversation_id === conversation_id);
         if (conversation && responses.length > 0) {
             // Set the current response props to the last response
             setCurrentResponseProps({
@@ -31,7 +31,7 @@ export default function Chats() {
             });
             document.title = `Chat: ${conversation.title}`;
         }
-    }, [conversations, responses]);
+    }, [conversationTitles, responses]);
 
     useEffect(() => {
         if (loading) return;
@@ -42,7 +42,7 @@ export default function Chats() {
                 headers: {
                     Authorization: `Bearer ${session.access_token}`
                 },
-            }).then((res: FetchingResponseProps[]) => {
+            }).then((res: FetchResponseProps[]) => {
                 setResponses(res);
                 setHasFetched(true);
                 setLoading(false);

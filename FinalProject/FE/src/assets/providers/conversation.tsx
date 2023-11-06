@@ -2,29 +2,28 @@
 import { Dispatch, SetStateAction, createContext, useContext, useState } from 'react';
 
 
-// This is used for Creating chat 
-export type CreatingResponseProps = {
-    conversation_id: string;
+// Base response props
+export type ResponseProps = {
     response_id: string;
     choice_id: string;
-    title: string;
+    message: string;
     log: string;
 };
 
 // This is used for the chat fetching
-export type FetchingResponseProps = {
-    response_id: string;
-    choice_id: string;
-    message?: string;
-    log: string;
-};
+// title is not provided when continuing a conversation
+export type FetchResponseProps = {
+    conversation_id: string;
+    title?: string;
+} & ResponseProps;
 
-// This is used for passing context to the chatInput
-export type ConversationProps = {
+// This is used for title display
+export type ConversationTitleProps = {
     title: string;
     conversation_id: string;
 };
 
+// This is used for passing context to the chatInput
 export type CreateResponseProps = {
     conversation_id: string;
     response_id: string;
@@ -33,15 +32,15 @@ export type CreateResponseProps = {
 
 type ConversationContextType = {
     state: {
-        conversations: ConversationProps[];
+        conversationTitles: ConversationTitleProps[];
         currentResponseProps: CreateResponseProps;
-        responses: FetchingResponseProps[];
+        responses: ResponseProps[];
         creating: boolean;
     };
     dispatch: {
-        setConversations: Dispatch<SetStateAction<ConversationProps[]>>;
+        setConversationTitles: Dispatch<SetStateAction<ConversationTitleProps[]>>;
         setCurrentResponseProps: Dispatch<SetStateAction<CreateResponseProps>>;
-        setResponses: Dispatch<SetStateAction<FetchingResponseProps[]>>;
+        setResponses: Dispatch<SetStateAction<ResponseProps[]>>;
         setCreating: Dispatch<SetStateAction<boolean>>;
     };
 };
@@ -53,20 +52,20 @@ export const useConversation = () => useContext(ConversationContext);
 
 export const ConversationProvider = ({ children }: { children: React.ReactNode }) => {
     // Ex: [{title: "title", conversation_id: "conversation_id"}]
-    const [conversations, setConversations] = useState<ConversationProps[]>([]);
+    const [conversationTitles, setConversationTitles] = useState<ConversationTitleProps[]>([]);
     const [currentResponseProps, setCurrentResponseProps] = useState<CreateResponseProps>({ conversation_id: "", response_id: "", choice_id: "" });
-    const [responses, setResponses] = useState<FetchingResponseProps[]>([]);
+    const [responses, setResponses] = useState<ResponseProps[]>([]);
     // This indicate if the new response is loading
     const [creating, setCreating] = useState<boolean>(false);
 
     const value = {
         state: {
-            conversations: conversations,
+            conversationTitles: conversationTitles,
             currentResponseProps: currentResponseProps,
             responses: responses,
             creating: creating
         },
-        dispatch: { setConversations, setCurrentResponseProps, setResponses, setCreating }
+        dispatch: { setConversationTitles, setCurrentResponseProps, setResponses, setCreating }
     };
 
     return (

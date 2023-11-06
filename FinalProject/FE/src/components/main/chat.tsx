@@ -2,12 +2,12 @@ import Markdown from 'markdown-to-jsx';
 
 import AccountCircle from "@mui/icons-material/AccountCircle";
 
-import { type FetchingResponseProps } from "@/assets/providers/conversation";
+import { type ResponseProps } from "@/assets/providers/conversation";
 
 import styles from "@/css/main/chat.module.css";
 
 
-const Chat: React.FC<{ responses: FetchingResponseProps[] }> = ({ responses }) => {
+const Chat: React.FC<{ responses: ResponseProps[] }> = ({ responses }) => {
 
     return (
         <>

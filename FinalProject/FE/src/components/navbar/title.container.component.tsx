@@ -8,14 +8,14 @@ import AddIcon from '@mui/icons-material/Add';
 import Button from "@mui/material/Button"
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { type ConversationProps, useConversation } from '@/assets/providers/conversation';
+import { type ConversationTitleProps, useConversation } from '@/assets/providers/conversation';
 import { BEfetch } from '@/assets/fetch/BEfetch';
 
 import styles from '@/css/navbar/title.module.css'
 
 
 const TitleContainer: React.FC = () => {
-    const { state: { conversations, currentResponseProps }, dispatch: { setConversations } } = useConversation();
+    const { state: { conversationTitles, currentResponseProps }, dispatch: { setConversationTitles } } = useConversation();
     const [loading, setLoading] = useState(true);
     const [hasFetched, setHasFetched] = useState(false);
 
@@ -32,8 +32,8 @@ const TitleContainer: React.FC = () => {
             headers: {
                 Authorization: `Bearer ${session.access_token}`,
             },
-        }).then((res: ConversationProps[]) => {
-            setConversations([...res]);
+        }).then((res: ConversationTitleProps[]) => {
+            setConversationTitles([...res]);
             setHasFetched(true);
             setLoading(false);
         });
@@ -67,16 +67,16 @@ const TitleContainer: React.FC = () => {
                     </div>
                 }
 
-                {conversations.map((conversation) => (
+                {conversationTitles.map((conversationTitle) => (
                     <Button
-                        key={conversation.conversation_id}
+                        key={conversationTitle.conversation_id}
                         startIcon={<ChatBubbleOutlineIcon />}
-                        onClick={() => router.push(`/chats/${conversation.conversation_id}`)}
+                        onClick={() => router.push(`/chats/${conversationTitle.conversation_id}`)}
                         style={{ width: '100%' }}
-                        {...handleTitleSelect(conversation.conversation_id)}
+                        {...handleTitleSelect(conversationTitle.conversation_id)}
                     >
                         <span style={{ textTransform: 'initial' }}>
-                            {conversation.title}
+                            {conversationTitle.title}
                         </span>
                     </Button>
                 ))}

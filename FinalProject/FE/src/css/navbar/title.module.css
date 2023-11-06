@@ -15,6 +15,7 @@
 .titleContainer {
     overflow-y: auto;
     max-height: min-content;
+    padding-right: 1rem;
 }
 
 .loadingContainer span {
