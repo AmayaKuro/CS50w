@@ -21,7 +21,6 @@ export default function ChatInput() {
     const router = useRouter();
 
 
-    // TODO: currently not working onclick
     const sendMessage = useCallback(() => {
         if (message === "" || !session?.access_token || creating) return;
 
@@ -93,7 +92,6 @@ export default function ChatInput() {
                 onChange={(e) => setMessage(e.currentTarget.value)}
             />
             <IconButton
-                // TODO: Made this color go gray when disable?
                 children={<SendIcon />}
                 className={styles.submitButton}
                 onClick={() => sendMessage()}
