@@ -7,14 +7,14 @@ import InputBase from '@mui/material/InputBase';
 import IconButton from "@mui/material/IconButton";
 import SendIcon from '@mui/icons-material/Send';
 
-import { type CreatingResponseProps, useConversation } from "@/assets/providers/conversation";
+import { type FetchResponseProps, useConversation } from "@/assets/providers/conversation";
 import { BEfetch } from "@/assets/fetch/BEfetch";
 
 import styles from "@/css/main/chatInput.module.css";
 
 
 export default function ChatInput() {
-    const { state: { currentResponseProps, creating }, dispatch: { setResponses, setCreating, setConversations } } = useConversation();
+    const { state: { currentResponseProps, creating }, dispatch: { setResponses, setCreating, setConversationTitles } } = useConversation();
     const [message, setMessage] = useState("");
 
     const { data: session } = useSession();
@@ -40,8 +40,8 @@ export default function ChatInput() {
                     Authorization: `Bearer ${session?.access_token}`
                 },
                 body: JSON.stringify(payload),
-            }).then((res: CreatingResponseProps) => {
-                setConversations((prev) => prev.concat({ title: res.title, conversation_id: res.conversation_id }));
+            }).then((res: FetchResponseProps) => {
+                setConversationTitles((prev) => prev.concat({ title: res?.title ?? "", conversation_id: res.conversation_id }));
                 setResponses([{
                     ...res,
                     message: message,
@@ -65,7 +65,8 @@ export default function ChatInput() {
                     Authorization: `Bearer ${session?.access_token}`
                 },
                 body: JSON.stringify(payload)
-            }).then((res: CreatingResponseProps) => {
+            }).then((res: FetchResponseProps) => {
+                console.log(res);
                 setResponses((prev) => prev.concat({
                     ...res,
                     message: message,
