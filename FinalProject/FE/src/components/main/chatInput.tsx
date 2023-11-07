@@ -14,7 +14,7 @@ import styles from "@/css/main/chatInput.module.css";
 
 
 export default function ChatInput() {
-    const { state: { currentResponseProps, creating }, dispatch: { setResponses, setCreating, setConversationTitles } } = useConversation();
+    const { state: { currentResponseProps, createStatus }, dispatch: { setResponseDisplay, setCreateStatus, setConversationTitles } } = useConversation();
     const [message, setMessage] = useState("");
 
     const { data: session } = useSession();
@@ -22,11 +22,15 @@ export default function ChatInput() {
 
 
     const sendMessage = useCallback(() => {
-        if (message === "" || !session?.access_token || creating) return;
+        if (message === "" || !session?.access_token) return;
 
-        // Reset the message once the message is sent
+        // Set the creating status to true, the message to the current message
+        // and reset the message once the message is sent
+        setCreateStatus({
+            isCreating: true,
+            message: message,
+        });
         setMessage("");
-        setCreating(true);
 
         if (currentResponseProps.conversation_id === "") {
             BackendFetch(`/conversation`, {
@@ -37,15 +41,15 @@ export default function ChatInput() {
                 body: {
                     message: message,
                 },
-            })
-                .then((res) => {
-                    if (!res.ok) {
-                        throw new Error(res.statusText);
-                    }
+            }).then((res) => {
+                if (!res.ok) {
+                    throw new Error(res.statusText);
+                }
 
-                    return res.json();
-                })
+                return res.json();
+            })
                 .then((res: FetchResponseProps) => {
+                    // Add the new conversation to the begin of conversation titles
                     setConversationTitles((prev) => [
                         {
                             conversation_id: res.conversation_id,
@@ -54,43 +58,64 @@ export default function ChatInput() {
                         ...prev,
                     ]);
 
-                    setResponses([{
-                        ...res,
+                    // Set the current response props to the new conversation, mark as "create new conversation"
+                    setResponseDisplay({
+                        isCreateNewConversation: true,
+                        responses: [{
+                            ...res,
+                            message: message,
+                        }],
+                    });
+
+                    setCreateStatus({
+                        isCreating: false,
+                        // This is the message that is sent
                         message: message,
-                    }]);
+                    });
 
                     router.push(`/chats/${res.conversation_id}`);
-                    setCreating(false);
+
                 }).catch((err) => {
-                    setCreating(false);
+                    setCreateStatus({
+                        isCreating: false,
+                        message: "",
+                    });
                 });
         }
         else {
             BackendFetch("/response", {
                 method: "POST",
-                headers: {
-                    Authorization: `Bearer ${session?.access_token}`
-                },
+                headers: { Authorization: `Bearer ${session?.access_token}` },
                 body: {
                     message: message,
                     ...currentResponseProps
                 }
-            })
-                .then((res) => {
-                    if (!res.ok) {
-                        throw new Error(res.statusText);
-                    }
+            }).then((res) => {
+                if (!res.ok) {
+                    throw new Error(res.statusText);
+                }
 
-                    return res.json();
-                })
+                return res.json();
+            })
                 .then((res: FetchResponseProps) => {
-                    setResponses((prev) => prev.concat({
-                        ...res,
-                        message: message,
+                    setResponseDisplay((prev) => ({
+                        isCreateNewConversation: true,
+                        responses: prev.responses.concat({
+                            ...res,
+                            message: message,
+                        }),
                     }));
-                    setCreating(false);
+
+                    setCreateStatus({
+                        isCreating: false,
+                        // This is the message that is sent
+                        message: message,
+                    });
                 }).catch((err) => {
-                    setCreating(false);
+                    setCreateStatus({
+                        isCreating: false,
+                        message: "",
+                    });
                 });
         }
 
@@ -113,7 +138,7 @@ export default function ChatInput() {
                 children={<SendIcon />}
                 className={styles.submitButton}
                 onClick={() => sendMessage()}
-                disabled={message === ""}
+                disabled={message === "" || createStatus.isCreating}
             />
 
         </div>
