@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials"
 
-import { BEfetch } from "@/assets/fetch/BEfetch";
+import { BackendFetch } from "@/assets/fetch/BE";
 import { refreshAccessToken, getCurrentEpochTime } from "@/assets/authenticate/token";
 import * as env from "@/assets/env";
 
@@ -18,15 +18,12 @@ const handler = NextAuth({
             async authorize(credentials, req) {
                 if (!credentials?.username || !credentials?.password) throw new Error("Missing username or password")
 
-                const payload = {
-                    username: credentials?.username,
-                    password: credentials?.password,
-                }
-
-                const res = await fetch(env.BACKEND_URL + "/login", {
+                const res = await BackendFetch("/login", {
                     method: 'POST',
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
+                    body: {
+                        username: credentials?.username,
+                        password: credentials?.password,
+                    },
                 })
 
                 if (res.status === 401) throw new Error("Username or password is incorrect")
@@ -83,9 +80,11 @@ const handler = NextAuth({
                 refresh: messages.token["refresh_token"],
             };
 
-            await BEfetch("/signout", {
+            await BackendFetch("/signout", {
                 method: "POST",
-                body: JSON.stringify(payload),
+                body: {
+                    refresh: messages.token["refresh_token"],
+                },
             });
         },
     },

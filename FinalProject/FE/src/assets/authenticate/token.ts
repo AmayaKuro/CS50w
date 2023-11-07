@@ -1,4 +1,4 @@
-import { BEfetch } from "../fetch/BEfetch";
+import { BackendFetch } from "../fetch/BE";
 import { NEXTAUTH_URL } from "../env"
 
 export const refreshAccessToken = async (refreshToken?: string) => {
@@ -7,17 +7,15 @@ export const refreshAccessToken = async (refreshToken?: string) => {
         new Error("No refresh token");
     }
 
-    const payload = {
-        refresh: refreshToken,
-    };
-    
     try {
-        const response = await BEfetch("/token/refresh/", {
+        const response = await BackendFetch("/token/refresh/", {
             method: "POST",
-            body: JSON.stringify(payload),
+            body: {
+                refresh: refreshToken,
+            },
         });
 
-        return response;
+        return await response.json();
     }
     // If cannnot get a new access token, sign out
     catch (e) {

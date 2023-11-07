@@ -3,11 +3,13 @@ import Link from 'next/link'
 import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
-import { type T, passwordChecker } from '@/assets/authenticate/password'
 
+import { type T, passwordChecker } from '@/assets/authenticate/password'
 import { TextField, LinearProgress } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
 import { motion } from "framer-motion";
+
+import { BackendFetch } from '@/assets/fetch/BE'
 
 import styles from '@/css/authenticate.module.css'
 
@@ -42,17 +44,13 @@ export default function Register() {
         e.preventDefault();
 
         setLoading(true);
-        const payload = {
-            username: username,
-            password: password,
-        }
 
-        const res = await fetch("http://127.0.0.1:8000/api/register", {
+        const res = await BackendFetch("/register", {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+            body: {
+                username: username,
+                password: password,
             },
-            body: JSON.stringify(payload),
         });
 
         if (res.status === 400 || res.status === 401) {
