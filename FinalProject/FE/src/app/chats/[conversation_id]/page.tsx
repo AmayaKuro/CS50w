@@ -9,9 +9,9 @@ import Chat from "@/components/main/chat"
 
 
 export default function Chats() {
-    const { state: { conversationTitles, responses, creating }, dispatch: { setCurrentResponseProps, setResponses } } = useConversation();
-    const [hasFetched, setHasFetched] = useState(false);
+    const { state: { conversationTitles, responseDisplay, createStatus }, dispatch: { setCurrentResponseProps, setResponseDisplay } } = useConversation();
     const [loading, setLoading] = useState(false);
+    const [hasFetched, setHasFetched] = useState(false);
 
     const { data: session } = useSession();
 
@@ -20,6 +20,8 @@ export default function Chats() {
 
     // This will always set current response props to the last response when responses state changes
     useEffect(() => {
+        const { responses } = responseDisplay;
+
         // Match the current conversation_id to the conversation title
         const conversation = conversationTitles.find((conversationTitle) => conversationTitle.conversation_id === conversation_id);
         if (conversation && responses.length > 0) {
@@ -31,12 +33,17 @@ export default function Chats() {
             });
             document.title = `Chat: ${conversation.title}`;
         }
-    }, [conversationTitles, responses]);
+    }, [conversationTitles, responseDisplay]);
 
     useEffect(() => {
-        if (loading) return;
+        if (hasFetched) return;
 
-        if (session?.access_token && !hasFetched) {
+        if (responseDisplay.isCreateNewConversation) {
+            setHasFetched(true);
+            return;
+        }
+
+        if (session?.access_token && !loading) {
             setLoading(true);
             BackendFetch(`/response?conversation_id=${conversation_id}`, {
                 headers: {
@@ -51,21 +58,24 @@ export default function Chats() {
                     return res.json();
                 })
                 .then((res: FetchResponseProps[]) => {
-                    setResponses(res);
-                    setHasFetched(true);
+                    setResponseDisplay({
+                        isCreateNewConversation: false,
+                        responses: res,
+                    });
                     setLoading(false);
+                    setHasFetched(true);
                 })
                 .catch((err) => {
                     setLoading(false);
                 });
         }
-    }, [session?.access_token, hasFetched, loading]);
+    }, [session?.access_token, hasFetched, loading, responseDisplay.isCreateNewConversation]);
 
 
     return (
         <>
             <Chat
-                responses={responses}
+                responses={responseDisplay.responses}
             />
             {(loading) ? <div>Loading...</div> : null}
         </>
