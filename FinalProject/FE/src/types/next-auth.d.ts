@@ -5,26 +5,26 @@ declare module "next-auth" {
   interface Session {
     access_token?: string;
     user: {
-      name: string;
+      name?: string;
     } & DefaultSession["user"];
   };
 
   // access and refresh tokens are named to match the backend
   interface User {
     user: {
-      name: string;
+      name?: string;
     };
-    access: string;
+    access?: string;
     refresh: string;
   };
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    name: string;
-    access_token: string;
+    name?: string;
+    access_token?: string;
     refresh_token: string;
-    access_ref: number;
+    access_ref?: number;
   };
 }
 
