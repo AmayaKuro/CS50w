@@ -56,8 +56,8 @@ const handler = NextAuth({
             }
 
             // Refresh the backend access token if it has expired
-            if (getCurrentEpochTime() > token.access_ref) {
-                const response = await refreshAccessToken(token["refresh_token"]);
+            if (getCurrentEpochTime() > (token.access_ref || 0)) {
+                const response = await refreshAccessToken(token?.refresh_token);
 
                 // else, update the token
                 token["access_token"] = response.access;
@@ -68,9 +68,9 @@ const handler = NextAuth({
         },
 
         async session({ token, session }) {
-            session.access_token = token.access_token;
-            session.expires = new Date(token.access_ref).toTimeString();
-            session.user.name = token.name;
+            session.access_token = token?.access_token;
+            session.expires = new Date(token?.access_ref || (Date.now() / 1000)).toTimeString();
+            session.user.name = token?.name;
             return session;
         },
 
