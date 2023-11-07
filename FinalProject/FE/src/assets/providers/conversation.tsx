@@ -10,6 +10,14 @@ export type ResponseProps = {
     log: string;
 };
 
+// This structure is used for the chat display
+// if new chat is being created, createNew is true, web doesn't request a GET to the backend
+// else if it a normal GET, createNew is false and the web will fetch from the backend
+export type ResponseDisplayProps = {
+    isCreateNewConversation: boolean;
+    responses: ResponseProps[];
+};
+
 // This is used for the chat fetching
 // title is not provided when continuing a conversation
 export type FetchResponseProps = {
@@ -30,18 +38,24 @@ export type CreateResponseProps = {
     choice_id: string;
 };
 
+// This is used for the loading state when creating a new response
+export type CreateStatus = {
+    isCreating: boolean;
+    message: string;
+};
+
 type ConversationContextType = {
     state: {
         conversationTitles: ConversationTitleProps[];
         currentResponseProps: CreateResponseProps;
-        responses: ResponseProps[];
-        creating: boolean;
+        responseDisplay: ResponseDisplayProps;
+        createStatus: CreateStatus;
     };
     dispatch: {
         setConversationTitles: Dispatch<SetStateAction<ConversationTitleProps[]>>;
         setCurrentResponseProps: Dispatch<SetStateAction<CreateResponseProps>>;
-        setResponses: Dispatch<SetStateAction<ResponseProps[]>>;
-        setCreating: Dispatch<SetStateAction<boolean>>;
+        setResponseDisplay: Dispatch<SetStateAction<ResponseDisplayProps>>;
+        setCreateStatus: Dispatch<SetStateAction<CreateStatus>>;
     };
 };
 
@@ -54,18 +68,18 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
     // Ex: [{title: "title", conversation_id: "conversation_id"}]
     const [conversationTitles, setConversationTitles] = useState<ConversationTitleProps[]>([]);
     const [currentResponseProps, setCurrentResponseProps] = useState<CreateResponseProps>({ conversation_id: "", response_id: "", choice_id: "" });
-    const [responses, setResponses] = useState<ResponseProps[]>([]);
+    const [responseDisplay, setResponseDisplay] = useState<ResponseDisplayProps>({ isCreateNewConversation: false, responses: [] });
     // This indicate if the new response is loading
-    const [creating, setCreating] = useState<boolean>(false);
+    const [createStatus, setCreateStatus] = useState<CreateStatus>({ isCreating: false, message: "" });
 
     const value = {
         state: {
             conversationTitles: conversationTitles,
             currentResponseProps: currentResponseProps,
-            responses: responses,
-            creating: creating
+            responseDisplay: responseDisplay,
+            createStatus: createStatus
         },
-        dispatch: { setConversationTitles, setCurrentResponseProps, setResponses, setCreating }
+        dispatch: { setConversationTitles, setCurrentResponseProps, setResponseDisplay, setCreateStatus }
     };
 
     return (
