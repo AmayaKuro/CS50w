@@ -14,7 +14,7 @@
 
 .titleContainer {
     overflow-y: auto;
-    max-height: min-content;
+    height: 100%;
     padding-right: 1rem;
 }
 

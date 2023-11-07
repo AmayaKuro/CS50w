@@ -42,7 +42,7 @@ def requestConversation(request):
         conversations = (
             Conversations.objects.values("conversation_id", "title")
             .filter(owner=request.user)
-            .order_by("pk")
+            .order_by("-pk")
         )
         serializer = ConversationSerializer(conversations, many=True)
 
