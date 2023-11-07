@@ -8,7 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import SendIcon from '@mui/icons-material/Send';
 
 import { type FetchResponseProps, useConversation } from "@/assets/providers/conversation";
-import { BEfetch } from "@/assets/fetch/BEfetch";
+import { BackendFetch } from "@/assets/fetch/BE";
 
 import styles from "@/css/main/chatInput.module.css";
 
@@ -29,51 +29,63 @@ export default function ChatInput() {
         setCreating(true);
 
         if (currentResponseProps.conversation_id === "") {
-            const payload = {
-                message: message,
-            };
-
-            BEfetch(`/conversation`, {
+            BackendFetch(`/conversation`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${session?.access_token}`
                 },
-                body: JSON.stringify(payload),
-            }).then((res: FetchResponseProps) => {
-                setConversationTitles((prev) => prev.concat({ title: res?.title ?? "", conversation_id: res.conversation_id }));
-                setResponses([{
-                    ...res,
+                body: {
                     message: message,
-                }]);
+                },
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error(res.statusText);
+                    }
 
-                router.push(`/chats/${res.conversation_id}`);
-                setCreating(false);
-            }).catch((err) => {
-                setCreating(false);
-            });
+                    return res.json();
+                })
+                .then((res: FetchResponseProps) => {
+                    setConversationTitles((prev) => prev.concat({ title: res?.title ?? "", conversation_id: res.conversation_id }));
+                    setResponses([{
+                        ...res,
+                        message: message,
+                    }]);
+
+                    router.push(`/chats/${res.conversation_id}`);
+                    setCreating(false);
+                }).catch((err) => {
+                    setCreating(false);
+                });
         }
         else {
-            const payload = {
-                message: message,
-                ...currentResponseProps,
-            };
-
-            BEfetch("/response", {
+            BackendFetch("/response", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${session?.access_token}`
                 },
-                body: JSON.stringify(payload)
-            }).then((res: FetchResponseProps) => {
-                console.log(res);
-                setResponses((prev) => prev.concat({
-                    ...res,
+                body: {
                     message: message,
-                }));
-                setCreating(false);
-            }).catch((err) => {
-                setCreating(false);
-            });
+                    ...currentResponseProps
+                }
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error(res.statusText);
+                    }
+
+                    return res.json();
+                })
+                .then((res: FetchResponseProps) => {
+                    console.log(res);
+                    setResponses((prev) => prev.concat({
+                        ...res,
+                        message: message,
+                    }));
+                    setCreating(false);
+                }).catch((err) => {
+                    setCreating(false);
+                });
         }
 
     }, [message, session?.access_token, currentResponseProps]);

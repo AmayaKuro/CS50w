@@ -4,7 +4,7 @@ import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 
 import { type FetchResponseProps, useConversation, } from "@/assets/providers/conversation"
-import { BEfetch } from "@/assets/fetch/BEfetch"
+import { BackendFetch } from "@/assets/fetch/BE"
 import Chat from "@/components/main/chat"
 
 
@@ -38,15 +38,26 @@ export default function Chats() {
 
         if (session?.access_token && !hasFetched) {
             setLoading(true);
-            BEfetch(`/response?conversation_id=${conversation_id}`, {
+            BackendFetch(`/response?conversation_id=${conversation_id}`, {
                 headers: {
                     Authorization: `Bearer ${session.access_token}`
                 },
-            }).then((res: FetchResponseProps[]) => {
-                setResponses(res);
-                setHasFetched(true);
-                setLoading(false);
             })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error(res.statusText);
+                    }
+
+                    return res.json();
+                })
+                .then((res: FetchResponseProps[]) => {
+                    setResponses(res);
+                    setHasFetched(true);
+                    setLoading(false);
+                })
+                .catch((err) => {
+                    setLoading(false);
+                });
         }
     }, [session?.access_token, hasFetched, loading]);
 
