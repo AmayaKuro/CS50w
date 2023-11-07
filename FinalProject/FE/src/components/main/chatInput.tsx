@@ -46,7 +46,14 @@ export default function ChatInput() {
                     return res.json();
                 })
                 .then((res: FetchResponseProps) => {
-                    setConversationTitles((prev) => prev.concat({ title: res?.title ?? "", conversation_id: res.conversation_id }));
+                    setConversationTitles((prev) => [
+                        {
+                            conversation_id: res.conversation_id,
+                            title: res.title ?? "",
+                        },
+                        ...prev,
+                    ]);
+
                     setResponses([{
                         ...res,
                         message: message,
@@ -77,7 +84,6 @@ export default function ChatInput() {
                     return res.json();
                 })
                 .then((res: FetchResponseProps) => {
-                    console.log(res);
                     setResponses((prev) => prev.concat({
                         ...res,
                         message: message,

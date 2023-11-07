@@ -14,7 +14,7 @@ const Chat: React.FC<{ responses: ResponseProps[] }> = ({ responses }) => {
             {responses.map((response) => (
                 <div key={response.response_id}>
                     <div className={styles.userMessage}>
-                        <AccountCircle />
+                        <AccountCircle fontSize='large' />
                         {response.message}
                     </div>
                     <div className={styles.markdownContainer}>
