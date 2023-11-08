@@ -16,7 +16,7 @@ export default function AuthenticationLayout({
         if (session) {
             router.push('/chats')
         }
-    })
+    },[session])
 
     return (
         <>
