@@ -99,7 +99,7 @@ export default function ChatInput() {
             })
                 .then((res: FetchResponseProps) => {
                     setResponseDisplay((prev) => ({
-                        isCreateNewConversation: true,
+                        isCreateNewConversation: false,
                         responses: prev.responses.concat({
                             ...res,
                             message: message,

@@ -44,6 +44,10 @@ def requestConversation(request):
             .filter(owner=request.user)
             .order_by("-pk")
         )
+
+        if len(conversations) < 1:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
         serializer = ConversationSerializer(conversations, many=True)
 
         return Response(serializer.data)
@@ -95,6 +99,7 @@ def requestConversation(request):
             conversation_id = data["conversation_id"]
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
         if not idCheck(conversation_id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -119,17 +124,15 @@ def requestResponse(request):
         conversation_id = request.GET.get("conversation_id")
         if not idCheck(conversation_id):
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        try:
-            responses = (
-                Responses.objects.values("response_id", "choice_id", "log", "message")
-                .filter(conversation__conversation_id=conversation_id)
-                .order_by("pk")
-            )
 
-            if len(responses) < 1:
-                raise Exception("No responses found")
-        except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        responses = (
+            Responses.objects.values("response_id", "choice_id", "log", "message")
+            .filter(conversation__conversation_id=conversation_id)
+            .order_by("pk")
+        )
+
+        if len(responses) < 1:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = ResponseSerializer(responses, many=True)
         return Response(serializer.data)
