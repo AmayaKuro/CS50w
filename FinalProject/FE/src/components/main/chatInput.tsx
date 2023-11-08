@@ -69,14 +69,10 @@ export default function ChatInput() {
                         }],
                     });
 
-                    setCreateStatus((prev) => ({
-                        ...prev,
-                        isCreating: false,
-                    }));
-
+                    // Push to the new conversation before turn off isCreating
                     router.push(`/chats/${res.conversation_id}`);
-
-                }).catch((err) => {
+                }).catch()
+                .finally(() => {
                     setCreateStatus((prev) => ({
                         ...prev,
                         isCreating: false,
@@ -106,12 +102,8 @@ export default function ChatInput() {
                             message: message,
                         }),
                     }));
-
-                    setCreateStatus((prev) => ({
-                        ...prev,
-                        isCreating: false,
-                    }));
-                }).catch((err) => {
+                }).catch()
+                .finally(() => {
                     setCreateStatus((prev) => ({
                         ...prev,
                         isCreating: false,

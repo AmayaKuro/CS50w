@@ -25,7 +25,6 @@ type TitleSectionProps = {
 
 const TitleContainer: React.FC = () => {
     const { state: { conversationTitles, currentResponseProps }, dispatch: { setConversationTitles } } = useConversation();
-    const [loading, setLoading] = useState(true);
     const [hasFetched, setHasFetched] = useState(false);
     const [anchorTitleSelected, setAnchorTitleSelected] = useState<TitleSectionProps>();
     const [deleting, setDeleting] = useState(false);
@@ -47,7 +46,7 @@ const TitleContainer: React.FC = () => {
             },
         })
             .then((res) => {
-                if (!res.ok) {
+                if (res.status !== 200) {
                     throw new Error(res.statusText);
                 }
 
@@ -56,10 +55,9 @@ const TitleContainer: React.FC = () => {
             .then((res: ConversationTitleProps[]) => {
                 setConversationTitles(res);
                 setHasFetched(true);
-                setLoading(false);
             })
-            .finally(() => {
-                setLoading(false);
+            .catch(() => {
+                setHasFetched(true);
             });
 
     }, [session, hasFetched]);
@@ -122,7 +120,7 @@ const TitleContainer: React.FC = () => {
             </div>
 
             <div className={styles.titleContainer}>
-                {loading &&
+                {!hasFetched &&
                     <div className={styles.loadingContainer}>
                         <CircularProgress />
                     </div>
