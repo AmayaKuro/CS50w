@@ -7,11 +7,11 @@ import { useRouter } from 'next/navigation'
 import { type FetchResponseProps, useConversation, } from "@/assets/providers/conversation"
 import { BackendFetch } from "@/assets/fetch/BE"
 import Chat from "@/components/main/chat"
+import { CreateResponseLoading } from "@/components/main/CreateResponseLoading"
 
 
 export default function Chats() {
     const { state: { conversationTitles, responseDisplay, createStatus }, dispatch: { setCurrentResponseProps, setResponseDisplay } } = useConversation();
-    const [loading, setLoading] = useState(false);
     const [hasFetched, setHasFetched] = useState(false);
 
     const { data: session } = useSession();
@@ -50,8 +50,7 @@ export default function Chats() {
             return;
         }
 
-        if (session?.access_token && !loading) {
-            setLoading(true);
+        if (session?.access_token) {
             BackendFetch(`/response?conversation_id=${conversation_id}`, {
                 headers: {
                     Authorization: `Bearer ${session.access_token}`
@@ -70,25 +69,22 @@ export default function Chats() {
                         isCreateNewConversation: false,
                         responses: res,
                     });
-                    setLoading(false);
                     setHasFetched(true);
                 })
                 .catch((err) => {
-
-
-                    console.error(err);
-                    setLoading(false);
                     router.push("/chats");
                 });
         }
-    }, [session?.access_token, hasFetched, loading, responseDisplay.isCreateNewConversation]);
+    }, [session?.access_token, hasFetched, responseDisplay.isCreateNewConversation]);
 
 
     return (
         <>
-            {(!loading)
-                ? <Chat responses={responseDisplay.responses} />
-                : <div>Loading...</div>
+            {!hasFetched ? <CreateResponseLoading />
+                : <Chat responses={responseDisplay.responses} />}
+            {(createStatus.isCreating && hasFetched && createStatus.conversation_id === conversation_id)
+                ? <CreateResponseLoading message={createStatus.message} />
+                : null
             }
         </>
 

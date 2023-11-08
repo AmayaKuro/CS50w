@@ -28,8 +28,10 @@ export default function ChatInput() {
         // and reset the message once the message is sent
         setCreateStatus({
             isCreating: true,
+            conversation_id: currentResponseProps.conversation_id,
             message: message,
         });
+
         setMessage("");
 
         if (currentResponseProps.conversation_id === "") {
@@ -67,19 +69,18 @@ export default function ChatInput() {
                         }],
                     });
 
-                    setCreateStatus({
+                    setCreateStatus((prev) => ({
+                        ...prev,
                         isCreating: false,
-                        // This is the message that is sent
-                        message: message,
-                    });
+                    }));
 
                     router.push(`/chats/${res.conversation_id}`);
 
                 }).catch((err) => {
-                    setCreateStatus({
+                    setCreateStatus((prev) => ({
+                        ...prev,
                         isCreating: false,
-                        message: "",
-                    });
+                    }));
                 });
         }
         else {
@@ -106,16 +107,15 @@ export default function ChatInput() {
                         }),
                     }));
 
-                    setCreateStatus({
+                    setCreateStatus((prev) => ({
+                        ...prev,
                         isCreating: false,
-                        // This is the message that is sent
-                        message: message,
-                    });
+                    }));
                 }).catch((err) => {
-                    setCreateStatus({
+                    setCreateStatus((prev) => ({
+                        ...prev,
                         isCreating: false,
-                        message: "",
-                    });
+                    }));
                 });
         }
 

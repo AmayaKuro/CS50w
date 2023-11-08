@@ -38,9 +38,10 @@ export type CreateResponseProps = {
     choice_id: string;
 };
 
-// This is used for the loading state when creating a new response
+// This is used to indicate the loading state when creating a new response for specific conversation
 export type CreateStatus = {
     isCreating: boolean;
+    conversation_id: string;
     message: string;
 };
 
@@ -70,7 +71,7 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
     const [currentResponseProps, setCurrentResponseProps] = useState<CreateResponseProps>({ conversation_id: "", response_id: "", choice_id: "" });
     const [responseDisplay, setResponseDisplay] = useState<ResponseDisplayProps>({ isCreateNewConversation: false, responses: [] });
     // This indicate if the new response is loading
-    const [createStatus, setCreateStatus] = useState<CreateStatus>({ isCreating: false, message: "" });
+    const [createStatus, setCreateStatus] = useState<CreateStatus>({ isCreating: false, message: "", conversation_id: "" });
 
     const value = {
         state: {
