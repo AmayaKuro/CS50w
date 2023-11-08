@@ -2,6 +2,7 @@
 import { useEffect, useCallback, useState } from "react"
 import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { useRouter } from 'next/navigation'
 
 import { type FetchResponseProps, useConversation, } from "@/assets/providers/conversation"
 import { BackendFetch } from "@/assets/fetch/BE"
@@ -17,6 +18,7 @@ export default function Chats() {
 
     const param = useParams();
     const conversation_id = (param as { conversation_id: string }).conversation_id;
+    const router = useRouter();
 
     // This will always set current response props to the last response when responses state changes
     useEffect(() => {
@@ -40,6 +42,11 @@ export default function Chats() {
 
         if (responseDisplay.isCreateNewConversation) {
             setHasFetched(true);
+
+            setResponseDisplay((prev) => ({
+                isCreateNewConversation: false,
+                responses: prev.responses,
+            }));
             return;
         }
 
@@ -52,7 +59,8 @@ export default function Chats() {
             })
                 .then((res) => {
                     if (!res.ok) {
-                        throw new Error(res.statusText);
+                        setHasFetched(true);
+                        throw new Error("Failed to fetch responses");
                     }
 
                     return res.json();
@@ -66,7 +74,11 @@ export default function Chats() {
                     setHasFetched(true);
                 })
                 .catch((err) => {
+
+
+                    console.error(err);
                     setLoading(false);
+                    router.push("/chats");
                 });
         }
     }, [session?.access_token, hasFetched, loading, responseDisplay.isCreateNewConversation]);
@@ -74,10 +86,10 @@ export default function Chats() {
 
     return (
         <>
-            <Chat
-                responses={responseDisplay.responses}
-            />
-            {(loading) ? <div>Loading...</div> : null}
+            {(!loading)
+                ? <Chat responses={responseDisplay.responses} />
+                : <div>Loading...</div>
+            }
         </>
 
     )

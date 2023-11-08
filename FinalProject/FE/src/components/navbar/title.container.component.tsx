@@ -81,7 +81,6 @@ const TitleContainer: React.FC = () => {
             },
         }).then((e) => {
             if (e.ok) {
-                console.log('deleted', currentResponseProps.conversation_id, conversation_id);
                 if (currentResponseProps.conversation_id === conversation_id) {
                     router.push('/chats');
                 }
