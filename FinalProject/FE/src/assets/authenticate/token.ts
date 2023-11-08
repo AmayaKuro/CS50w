@@ -15,6 +15,8 @@ export const refreshAccessToken = async (refreshToken?: string) => {
             },
         });
 
+        if(response.status !== 200) throw new Error("Cannot authenticate");
+
         return await response.json();
     }
     // If cannnot get a new access token, sign out

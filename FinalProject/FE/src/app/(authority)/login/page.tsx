@@ -41,8 +41,6 @@ export default function Login() {
         if (res?.error) {
             setError('Unable to sign in');
             setLoading(false);
-        } else {
-            router.push(searchParams.get('callbackUrl') || '/chats');
         }
 
     }, [username, password])

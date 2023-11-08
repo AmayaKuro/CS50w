@@ -76,10 +76,6 @@ const handler = NextAuth({
     events: {
         // Sign out from server when user signs out from client 
         async signOut(messages) {
-            const payload = {
-                refresh: messages.token["refresh_token"],
-            };
-
             await BackendFetch("/signout", {
                 method: "POST",
                 body: {
