@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 
 import { useConversation } from "@/assets/providers/conversation"
+import { CreateResponseLoading } from "@/components/main/CreateResponseLoading"
 
 
 
@@ -10,7 +11,7 @@ import { useConversation } from "@/assets/providers/conversation"
 export default function Home() {
     const { data, update } = useSession()
 
-    const { dispatch: { setCurrentResponseProps } } = useConversation();
+    const { state: { createStatus }, dispatch: { setCurrentResponseProps } } = useConversation();
 
 
     useEffect(() => {
@@ -24,7 +25,7 @@ export default function Home() {
     return (
         <div>
             <h1>Home</h1>
-
+            {(createStatus.isCreating && createStatus.conversation_id === "") ? <CreateResponseLoading  message={createStatus.message}/> : null}
         </div>
     )
 }
