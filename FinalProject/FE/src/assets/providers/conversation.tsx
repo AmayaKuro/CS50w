@@ -10,14 +10,6 @@ export type ResponseProps = {
     log: string;
 };
 
-// This structure is used for the chat display
-// if new chat is being created, createNew is true, web doesn't request a GET to the backend
-// else if it a normal GET, createNew is false and the web will fetch from the backend
-export type ResponseDisplayProps = {
-    isCreateNewConversation: boolean;
-    responses: ResponseProps[];
-};
-
 // This is used for the chat fetching
 // title is not provided when continuing a conversation
 export type FetchResponseProps = {
@@ -49,14 +41,14 @@ type ConversationContextType = {
     state: {
         conversationTitles: ConversationTitleProps[];
         currentResponseProps: CreateResponseProps;
-        responseDisplay: ResponseDisplayProps;
+        responses: ResponseProps[];
         createStatus: CreateStatus;
         initMessage: string;
     };
     dispatch: {
         setConversationTitles: Dispatch<SetStateAction<ConversationTitleProps[]>>;
         setCurrentResponseProps: Dispatch<SetStateAction<CreateResponseProps>>;
-        setResponseDisplay: Dispatch<SetStateAction<ResponseDisplayProps>>;
+        setResponse: Dispatch<SetStateAction<ResponseProps[]>>;
         setCreateStatus: Dispatch<SetStateAction<CreateStatus>>;
         setInitMessage: Dispatch<SetStateAction<string>>;
     };
@@ -71,7 +63,7 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
     // Ex: [{title: "title", conversation_id: "conversation_id"}]
     const [conversationTitles, setConversationTitles] = useState<ConversationTitleProps[]>([]);
     const [currentResponseProps, setCurrentResponseProps] = useState<CreateResponseProps>({ conversation_id: "", response_id: "", choice_id: "" });
-    const [responseDisplay, setResponseDisplay] = useState<ResponseDisplayProps>({ isCreateNewConversation: false, responses: [] });
+    const [responses, setResponse] = useState<ResponseProps[]>([]);
     // This indicate if the new response is loading
     const [createStatus, setCreateStatus] = useState<CreateStatus>({ isCreating: false, message: "", conversation_id: "" });
     // This is used for home recommend message     
@@ -81,11 +73,11 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
         state: {
             conversationTitles: conversationTitles,
             currentResponseProps: currentResponseProps,
-            responseDisplay: responseDisplay,
+            responses: responses,
             createStatus: createStatus,
             initMessage: initMessage,
         },
-        dispatch: { setConversationTitles, setCurrentResponseProps, setResponseDisplay, setCreateStatus, setInitMessage }
+        dispatch: { setConversationTitles, setCurrentResponseProps, setResponse, setCreateStatus, setInitMessage }
     };
 
     return (

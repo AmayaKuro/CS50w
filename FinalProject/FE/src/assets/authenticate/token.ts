@@ -4,7 +4,7 @@ import { NEXTAUTH_URL } from "../env"
 export const refreshAccessToken = async (refreshToken?: string) => {
     // If no refresh token, throw error
     if (!refreshToken) {
-        new Error("No refresh token");
+        throw new Error("No refresh token");
     }
 
     try {

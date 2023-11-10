@@ -11,7 +11,7 @@ import { CreateResponseLoading } from "@/components/main/CreateResponseLoading"
 
 
 export default function Chats() {
-    const { state: { conversationTitles, responseDisplay, createStatus }, dispatch: { setCurrentResponseProps, setResponseDisplay } } = useConversation();
+    const { state: { conversationTitles, responses, createStatus }, dispatch: { setCurrentResponseProps, setResponse } } = useConversation();
     const [hasFetched, setHasFetched] = useState(false);
 
     const { data: session } = useSession();
@@ -22,8 +22,6 @@ export default function Chats() {
 
     // This will always set current response props to the last response when responses state changes
     useEffect(() => {
-        const { responses } = responseDisplay;
-
         // Match the current conversation_id to the conversation title
         const conversation = conversationTitles.find((conversationTitle) => conversationTitle.conversation_id === conversation_id);
         if (conversation && responses.length > 0) {
@@ -35,18 +33,15 @@ export default function Chats() {
             });
             document.title = `Chat: ${conversation.title}`;
         }
-    }, [conversationTitles, responseDisplay]);
+    }, [conversationTitles, responses]);
 
     useEffect(() => {
         if (hasFetched) return;
 
-        if (responseDisplay.isCreateNewConversation) {
+        // If the user is creating a new conversation, don't fetch the responses
+        if (createStatus.isCreating && createStatus.conversation_id === conversation_id) {
             setHasFetched(true);
 
-            setResponseDisplay((prev) => ({
-                isCreateNewConversation: false,
-                responses: prev.responses,
-            }));
             return;
         }
 
@@ -65,23 +60,20 @@ export default function Chats() {
                     return res.json();
                 })
                 .then((res: FetchResponseProps[]) => {
-                    setResponseDisplay({
-                        isCreateNewConversation: false,
-                        responses: res,
-                    });
+                    setResponse(res);
                     setHasFetched(true);
                 })
                 .catch((err) => {
                     router.push("/chats");
                 });
         }
-    }, [session?.access_token, hasFetched, responseDisplay.isCreateNewConversation]);
+    }, [session?.access_token, hasFetched, createStatus]);
 
 
     return (
         <>
             {!hasFetched ? <CreateResponseLoading />
-                : <Chat responses={responseDisplay.responses} />}
+                : <Chat responses={responses} />}
             {(createStatus.isCreating && hasFetched && createStatus.conversation_id === conversation_id)
                 ? <CreateResponseLoading message={createStatus.message} />
                 : null
