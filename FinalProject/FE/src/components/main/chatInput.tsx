@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -14,22 +14,32 @@ import styles from "@/css/main/chatInput.module.css";
 
 
 export default function ChatInput() {
-    const { state: { currentResponseProps, createStatus }, dispatch: { setResponseDisplay, setCreateStatus, setConversationTitles } } = useConversation();
+    const { state: { currentResponseProps, createStatus, initMessage }, dispatch: { setResponseDisplay, setCreateStatus, setConversationTitles } } = useConversation();
     const [message, setMessage] = useState("");
 
     const { data: session } = useSession();
     const router = useRouter();
 
+    
+    // If initMessage is not empty, send it as a new conversation
+    useEffect(() => {
+        if (initMessage !== "") {
+            sendMessage(initMessage);
+        }
+    }, [initMessage]);
 
-    const sendMessage = useCallback(() => {
-        if (message === "" || !session?.access_token) return;
+
+    const sendMessage = useCallback((initingMessage?: string) => {
+        if ((message === "" && initMessage === "") || !session?.access_token) return;
+
+        const sendMessage = initingMessage || message;
 
         // Set the creating status to true, the message to the current message
         // and reset the message once the message is sent
         setCreateStatus({
             isCreating: true,
             conversation_id: currentResponseProps.conversation_id,
-            message: message,
+            message: sendMessage,
         });
 
         setMessage("");
@@ -41,7 +51,7 @@ export default function ChatInput() {
                     Authorization: `Bearer ${session?.access_token}`
                 },
                 body: {
-                    message: message,
+                    message: sendMessage,
                 },
             }).then((res) => {
                 if (!res.ok) {
@@ -65,7 +75,7 @@ export default function ChatInput() {
                         isCreateNewConversation: true,
                         responses: [{
                             ...res,
-                            message: message,
+                            message: sendMessage,
                         }],
                     });
 
@@ -84,7 +94,7 @@ export default function ChatInput() {
                 method: "POST",
                 headers: { Authorization: `Bearer ${session?.access_token}` },
                 body: {
-                    message: message,
+                    message: sendMessage,
                     ...currentResponseProps
                 }
             }).then((res) => {
@@ -99,7 +109,7 @@ export default function ChatInput() {
                         isCreateNewConversation: false,
                         responses: prev.responses.concat({
                             ...res,
-                            message: message,
+                            message: sendMessage,
                         }),
                     }));
                 }).catch()

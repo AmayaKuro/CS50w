@@ -7,9 +7,11 @@ const UserMessage: React.FC<{ message?: string }> = ({ message }) => {
     return (
         <div className={styles.container}>
             <AccountCircle fontSize='large' />
-            {message ? <p>{message}</p> : null}
+            {message
+                ? <p>{message}</p>
+                : <p className="rainbow_text">~ fetching ~</p>
+            }
         </div>
-
     );
 };
 
