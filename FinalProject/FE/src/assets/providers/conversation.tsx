@@ -51,12 +51,14 @@ type ConversationContextType = {
         currentResponseProps: CreateResponseProps;
         responseDisplay: ResponseDisplayProps;
         createStatus: CreateStatus;
+        initMessage: string;
     };
     dispatch: {
         setConversationTitles: Dispatch<SetStateAction<ConversationTitleProps[]>>;
         setCurrentResponseProps: Dispatch<SetStateAction<CreateResponseProps>>;
         setResponseDisplay: Dispatch<SetStateAction<ResponseDisplayProps>>;
         setCreateStatus: Dispatch<SetStateAction<CreateStatus>>;
+        setInitMessage: Dispatch<SetStateAction<string>>;
     };
 };
 
@@ -72,15 +74,18 @@ export const ConversationProvider = ({ children }: { children: React.ReactNode }
     const [responseDisplay, setResponseDisplay] = useState<ResponseDisplayProps>({ isCreateNewConversation: false, responses: [] });
     // This indicate if the new response is loading
     const [createStatus, setCreateStatus] = useState<CreateStatus>({ isCreating: false, message: "", conversation_id: "" });
+    // This is used for home recommend message     
+    const [initMessage, setInitMessage] = useState("");
 
     const value = {
         state: {
             conversationTitles: conversationTitles,
             currentResponseProps: currentResponseProps,
             responseDisplay: responseDisplay,
-            createStatus: createStatus
+            createStatus: createStatus,
+            initMessage: initMessage,
         },
-        dispatch: { setConversationTitles, setCurrentResponseProps, setResponseDisplay, setCreateStatus }
+        dispatch: { setConversationTitles, setCurrentResponseProps, setResponseDisplay, setCreateStatus, setInitMessage }
     };
 
     return (

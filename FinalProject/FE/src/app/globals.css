@@ -13,10 +13,11 @@ nav {
 }
 
 * {
-  scrollbar-color:#dadce0 transparent
+  scrollbar-color: #dadce0 transparent
 }
 
-::-webkit-scrollbar,::-webkit-scrollbar-corner {
+::-webkit-scrollbar,
+::-webkit-scrollbar-corner {
   background: transparent;
   height: 12px;
   width: 12px
@@ -38,4 +39,23 @@ nav {
 ::-webkit-scrollbar-button {
   height: 0;
   width: 0
+}
+
+.rainbow_text {
+  background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000, #ffff00, #00ff00);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: #fff9 !important;
+  animation: rainbow_animation 4s linear 0s infinite;
+  background-size: 400% 100%;
+}
+
+@keyframes rainbow_animation {
+  0% {
+    background-position: 0 0
+  }
+
+  to {
+    background-position: 100% 0
+  }
 }
