@@ -6,10 +6,10 @@ import Wrapper from './response/Wrapper';
 export const CreateResponseLoading: React.FC<{ message?: string }> = ({ message }) => {
 
     return (
-        <div >
+        <div style={{ marginBottom: "2rem" }} >
             <UserMessage message={message} />
             <Wrapper>
-                <LinearProgress color="info" style={{borderRadius: "1rem"}} />
+                <LinearProgress color="info" style={{ borderRadius: "1rem" }} />
             </Wrapper>
         </div>
 

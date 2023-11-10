@@ -14,13 +14,13 @@ import styles from "@/css/main/chatInput.module.css";
 
 
 export default function ChatInput() {
-    const { state: { currentResponseProps, createStatus, initMessage }, dispatch: { setResponseDisplay, setCreateStatus, setConversationTitles } } = useConversation();
+    const { state: { currentResponseProps, createStatus, initMessage }, dispatch: { setResponse, setCreateStatus, setConversationTitles } } = useConversation();
     const [message, setMessage] = useState("");
 
     const { data: session } = useSession();
     const router = useRouter();
 
-    
+
     // If initMessage is not empty, send it as a new conversation
     useEffect(() => {
         if (initMessage !== "") {
@@ -29,10 +29,10 @@ export default function ChatInput() {
     }, [initMessage]);
 
 
-    const sendMessage = useCallback((initingMessage?: string) => {
-        if ((message === "" && initMessage === "") || !session?.access_token) return;
+    const sendMessage = useCallback(async (callbackMessage?: string) => {
+        if ((message === "" && callbackMessage === "") || !session?.access_token) return;
 
-        const sendMessage = initingMessage || message;
+        const sendMessage = callbackMessage || message;
 
         // Set the creating status to true, the message to the current message
         // and reset the message once the message is sent
@@ -44,83 +44,73 @@ export default function ChatInput() {
 
         setMessage("");
 
-        if (currentResponseProps.conversation_id === "") {
-            BackendFetch(`/conversation`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${session?.access_token}`
-                },
-                body: {
-                    message: sendMessage,
-                },
-            }).then((res) => {
-                if (!res.ok) {
-                    throw new Error(res.statusText);
-                }
+        try {
+            var res
+            if (currentResponseProps.conversation_id === "") {
+                res = await BackendFetch(`/conversation`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${session?.access_token}`
+                    },
+                    body: {
+                        message: sendMessage,
+                    },
+                })
 
-                return res.json();
-            })
-                .then((res: FetchResponseProps) => {
-                    // Add the new conversation to the begin of conversation titles
-                    setConversationTitles((prev) => [
-                        {
-                            conversation_id: res.conversation_id,
-                            title: res.title ?? "",
-                        },
-                        ...prev,
-                    ]);
+                // Remove old response since it's a new conversation
+                setResponse([]);
+            }
+            else {
+                res = await BackendFetch("/response", {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${session?.access_token}` },
+                    body: {
+                        message: sendMessage,
+                        ...currentResponseProps
+                    }
+                })
+            }
 
-                    // Set the current response props to the new conversation, mark as "create new conversation"
-                    setResponseDisplay({
-                        isCreateNewConversation: true,
-                        responses: [{
-                            ...res,
-                            message: sendMessage,
-                        }],
-                    });
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
 
-                    // Push to the new conversation before turn off isCreating
-                    router.push(`/chats/${res.conversation_id}`);
-                }).catch()
-                .finally(() => {
-                    setCreateStatus((prev) => ({
-                        ...prev,
-                        isCreating: false,
-                    }));
-                });
+            // IDK wtf is going on here (actually I does understand some), but it works
+            const fetchResponse = res.json() as unknown as FetchResponseProps;
+
+            setResponse((prev) => (prev.concat({
+                ...fetchResponse,
+                message: sendMessage,
+            })))
+
+            setCreateStatus(({
+                isCreating: false,
+                conversation_id: fetchResponse.conversation_id,
+                message: sendMessage,
+            }));
+
+            if (currentResponseProps.conversation_id === "") {
+                // Add the new conversation to the begin of conversation titles
+                setConversationTitles((prev) => [
+                    {
+                        conversation_id: fetchResponse.conversation_id,
+                        title: fetchResponse.title ?? "",
+                    },
+                    ...prev,
+                ]);
+
+                // Push to the new conversation before turn off isCreating
+                router.push(`/chats/${fetchResponse.conversation_id}`);
+            }
+
+        } catch (e) {
+            setCreateStatus((prev) => ({
+                // TODO: might want to add a error message here
+                ...prev,
+                isCreating: false,
+            }))
         }
-        else {
-            BackendFetch("/response", {
-                method: "POST",
-                headers: { Authorization: `Bearer ${session?.access_token}` },
-                body: {
-                    message: sendMessage,
-                    ...currentResponseProps
-                }
-            }).then((res) => {
-                if (!res.ok) {
-                    throw new Error(res.statusText);
-                }
-
-                return res.json();
-            })
-                .then((res: FetchResponseProps) => {
-                    setResponseDisplay((prev) => ({
-                        isCreateNewConversation: false,
-                        responses: prev.responses.concat({
-                            ...res,
-                            message: sendMessage,
-                        }),
-                    }));
-                }).catch()
-                .finally(() => {
-                    setCreateStatus((prev) => ({
-                        ...prev,
-                        isCreating: false,
-                    }));
-                });
-        }
-
+        
     }, [message, session?.access_token, currentResponseProps]);
 
 
