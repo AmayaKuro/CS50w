@@ -59,7 +59,7 @@ export default function Home() {
                                 </ul>
                             </div>
                             <div>
-                                <p>Or continue where you had left:</p>
+                                <p>Or continue where you left off:</p>
                                 {conversationTitles.slice(0, 3).map((conversationTitle) =>
                                     <Button
                                         key={conversationTitle.conversation_id}
