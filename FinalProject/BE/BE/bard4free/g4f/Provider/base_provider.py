@@ -6,6 +6,7 @@ import browser_cookie3
 import asyncio
 from time import time
 import math
+import os
 
 
 class BaseProvider(ABC):
@@ -53,16 +54,20 @@ class BaseProvider(ABC):
         return f"g4f.provider.{cls.__name__} supports: ({param})"
 
 
-_cookies = {}
+# _cookies = {}
 
 def get_cookies(cookie_domain: str) -> dict:
-    if cookie_domain not in _cookies:
-        _cookies[cookie_domain] = {}
-        for cookie in browser_cookie3.chrome(domain_name=cookie_domain):
-            if cookie.name.startswith("__Secure-"):
-                _cookies[cookie_domain][cookie.name] = cookie.value
-    return _cookies[cookie_domain]
+    # if cookie_domain not in _cookies:
+    #     _cookies[cookie_domain] = {}
+    #     for cookie in browser_cookie3.chrome(domain_name=cookie_domain):
+    #         if cookie.name.startswith("__Secure-"):
+    #             _cookies[cookie_domain][cookie.name] = cookie.value
+    # return _cookies[cookie_domain]
 
+    # For production
+    return {
+        "__Secure-1PSID": os.environ.get("__Secure-1PSID"),
+    }
 
 class AsyncProvider(BaseProvider):
     @classmethod

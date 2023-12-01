@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -21,16 +21,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-f^malb7n5_(7%i$+$l(hiv6^pvka%rx_ig5i5mt&wicdf#7!^%'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# Hosting configuration
+ALLOWED_HOSTS = ["bard4free.alwaysdata.net"]
+
+SECURE_SSL_REDIRECT = True
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+SECURE_HSTS_SECONDS = 3600
+
+SECURE_HSTS_PRELOAD = True
 
 
 # Application definition
-#TODO: doesn't add cors and still work
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -82,8 +90,12 @@ WSGI_APPLICATION = 'BE.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get("DB_NAME"),
+        'USER': os.environ.get("DB_USER"),
+        'PASSWORD': os.environ.get("DB_PASSWORD"),
+        'HOST': 'mysql-bard4free.alwaysdata.net',
+        'PORT': '3306',
     }
 }
 
@@ -133,11 +145,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# List of origins that are authorized to make cross-site HTTP requests.
-# If don't want to set up CORS, comment out the following line.
-# CORS_ORIGIN_ALLOW_ALL = True
+# List of origins that are authorized to make cross-site HTTP requests. (FE URL)
 CORS_ORIGIN_WHITELIST = [
-     'http://localhost:3000'
+     os.environ.get('CORS_ORIGIN_WHITELIST')
 ]
 
 REST_FRAMEWORK = {
