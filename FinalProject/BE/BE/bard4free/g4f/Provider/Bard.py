@@ -35,7 +35,7 @@ class Bard(AsyncProvider):
             "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
             "origin": "https://bard.google.com",
             "referer": "https://bard.google.com/",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+            "user-agent": "	Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5748.204 Safari/537.36",
         }
 
         async with ClientSession(headers=headers, cookies=cookies) as session:

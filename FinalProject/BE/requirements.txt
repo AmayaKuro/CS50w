@@ -12,3 +12,4 @@ flask-cors
 django
 django-cors-headers
 djangorestframework
+boto3[crt]

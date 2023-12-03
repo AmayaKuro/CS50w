@@ -6,7 +6,6 @@ import browser_cookie3
 import asyncio
 from time import time
 import math
-import os
 
 
 class BaseProvider(ABC):
@@ -24,7 +23,7 @@ class BaseProvider(ABC):
         **kwargs: Any,
     ) -> CreateResult:
         raise NotImplementedError()
-    
+
     @staticmethod
     @abstractmethod
     def get_completion(
@@ -32,7 +31,7 @@ class BaseProvider(ABC):
         **kwargs: Any,
     ) -> CreateResult:
         raise NotImplementedError()
-    
+
     @staticmethod
     @abstractmethod
     def delete_completion(
@@ -40,7 +39,6 @@ class BaseProvider(ABC):
         **kwargs: Any,
     ) -> str:
         raise NotImplementedError()
-
 
     @classmethod
     @property
@@ -54,38 +52,54 @@ class BaseProvider(ABC):
         return f"g4f.provider.{cls.__name__} supports: ({param})"
 
 
-# _cookies = {}
+_cookies = {}
+
 
 def get_cookies(cookie_domain: str) -> dict:
     # if cookie_domain not in _cookies:
     #     _cookies[cookie_domain] = {}
     #     for cookie in browser_cookie3.chrome(domain_name=cookie_domain):
-    #         if cookie.name.startswith("__Secure-"):
+    #         if cookie.name.startswith("__Secure-1PSID"):
     #             _cookies[cookie_domain][cookie.name] = cookie.value
     # return _cookies[cookie_domain]
 
-    # For production
-    return {
-        "__Secure-1PSID": os.environ.get("__Secure-1PSID"),
-    }
+    # For deployment
+    import boto3
+
+    try:
+        ssm = boto3.client("ssm")
+        response = ssm.get_parameters(
+            Names=["__Secure-1PSID", "__Secure-1PSIDTS"], WithDecryption=True
+        ).get("Parameters")
+
+        return {
+            "__Secure-1PSID": response[0].get("Value"),
+            "__Secure-1PSIDTS": response[1].get("Value"),
+        }
+
+    except Exception:
+        return {}
+
 
 class AsyncProvider(BaseProvider):
     @classmethod
     def create_completion(
         cls,
         message: str,
-        conversation_id: str = '',
-        response_id: str = '',
-        choice_id: str = '',
+        conversation_id: str = "",
+        response_id: str = "",
+        choice_id: str = "",
         **kwargs: Any,
     ) -> CreateResult:
-        yield asyncio.run(cls.create_async(
-            message = message,
-            conversation_id = conversation_id,
-            response_id = response_id,
-            choice_id = choice_id,
-            **kwargs,
-        ))
+        yield asyncio.run(
+            cls.create_async(
+                message=message,
+                conversation_id=conversation_id,
+                response_id=response_id,
+                choice_id=choice_id,
+                **kwargs,
+            )
+        )
 
     @staticmethod
     @abstractmethod
@@ -98,17 +112,13 @@ class AsyncProvider(BaseProvider):
     ) -> str:
         raise NotImplementedError()
 
-
     @classmethod
     def get_completion(
         cls,
         conversation_id: str,
         **kwargs: Any,
     ) -> CreateResult:
-        yield asyncio.run(cls.get_async(
-            conversation_id=conversation_id,
-            **kwargs
-        ))
+        yield asyncio.run(cls.get_async(conversation_id=conversation_id, **kwargs))
 
     @staticmethod
     @abstractmethod
@@ -117,23 +127,20 @@ class AsyncProvider(BaseProvider):
         **kwargs: Any,
     ) -> str:
         raise NotImplementedError()
-    
+
     @classmethod
     @abstractmethod
     def delete_async(
         cls,
-        conversation_id: str = '',
+        conversation_id: str = "",
         **kwargs: Any,
     ) -> str:
-       raise NotImplementedError()
-    
+        raise NotImplementedError()
+
     @classmethod
     def delete_completion(
         cls,
         conversation_id: str,
         **kwargs: Any,
     ) -> CreateResult:
-        yield asyncio.run(cls.delete_async(
-            conversation_id=conversation_id,
-            **kwargs
-        ))
+        yield asyncio.run(cls.delete_async(conversation_id=conversation_id, **kwargs))

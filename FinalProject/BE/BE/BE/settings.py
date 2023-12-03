@@ -9,9 +9,16 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-import os
+
 from pathlib import Path
 from datetime import timedelta
+import boto3
+
+
+ssm = boto3.client("ssm")
+
+parameter = ssm.get_parameters(Names=["ALLOWED_HOSTS", "CORS_ORIGIN_WHITELIST", "DB_NAME", "DB_USER", "DB_HOST"]).get("Parameters")
+secureParameter = ssm.get_parameters(Names=["DJANGO_SECRET_KEY", "DB_PASSWORD"], WithDecryption=True).get("Parameters")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,13 +28,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = secureParameter[1].get("Value")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 # Hosting configuration
-ALLOWED_HOSTS = ["bard4free.alwaysdata.net"]
+ALLOWED_HOSTS = [parameter[0].get("Value")]
 
 SECURE_SSL_REDIRECT = True
 
@@ -91,11 +98,11 @@ WSGI_APPLICATION = 'BE.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get("DB_NAME"),
-        'USER': os.environ.get("DB_USER"),
-        'PASSWORD': os.environ.get("DB_PASSWORD"),
-        'HOST': 'mysql-bard4free.alwaysdata.net',
-        'PORT': '3306',
+        'NAME': parameter[3].get("Value"),
+        'USER': parameter[4].get("Value"),
+        'PASSWORD': secureParameter[0].get("Value"),
+        'HOST': parameter[2].get("Value"),
+        'PORT': 3306,
     }
 }
 
@@ -145,10 +152,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 # List of origins that are authorized to make cross-site HTTP requests. (FE URL)
-CORS_ORIGIN_WHITELIST = [
-     os.environ.get('CORS_ORIGIN_WHITELIST')
-]
+CORS_ORIGIN_WHITELIST = parameter[1].get("Value").split(",")
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
