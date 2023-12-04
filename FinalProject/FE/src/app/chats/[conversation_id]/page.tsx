@@ -56,7 +56,7 @@ export default function Chats() {
             });
             document.title = `Chat: ${conversation.title}`;
         }
-    }, [conversationTitles, responses]);
+    }, [conversationTitles, conversation_id, responses]);
 
     useEffect(() => {
         if (hasFetched) return;
@@ -94,7 +94,7 @@ export default function Chats() {
                     router.push("/chats");
                 });
         }
-    }, [session?.access_token, hasFetched, createStatus.conversation_id]);
+    }, [session?.access_token, hasFetched, createStatus.conversation_id, conversation_id]);
 
 
     return (

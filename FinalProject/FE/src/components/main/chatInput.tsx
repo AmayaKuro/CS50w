@@ -25,15 +25,6 @@ export default function ChatInput() {
     const router = useRouter();
 
 
-    // This is used for sending a message when the user choose and head start prompt
-    // If initMessage is not empty, send it as a new conversation
-    useEffect(() => {
-        if (initMessage !== "") {
-            sendMessage(initMessage);
-        }
-    }, [initMessage]);
-
-
     const sendMessage = useCallback(async (callbackMessage?: string) => {
         if ((isEmpty && callbackMessage === "") || !session?.access_token) return;
 
@@ -120,7 +111,16 @@ export default function ChatInput() {
             setSeverity("error");
         }
 
-    }, [message, session?.access_token, currentResponseProps]);
+    }, [message, session?.access_token, currentResponseProps, isEmpty]);
+
+
+    // This is used for sending a message when the user choose and head start prompt
+    // If initMessage is not empty, send it as a new conversation
+    useEffect(() => {
+        if (initMessage !== "") {
+            sendMessage(initMessage);
+        }
+    }, [initMessage, sendMessage]);
 
 
     return (
@@ -146,11 +146,12 @@ export default function ChatInput() {
                 }}
             />
             <IconButton
-                children={<SendIcon />}
                 className={styles.submitButton}
                 onClick={() => sendMessage()}
                 disabled={isEmpty || createStatus.isCreating}
-            />
+            >
+                <SendIcon />
+            </IconButton>
 
         </div>
 
