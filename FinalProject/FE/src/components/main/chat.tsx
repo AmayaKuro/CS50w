@@ -16,7 +16,9 @@ const Chat: React.FC<{ responses: ResponseProps[] }> = ({ responses }) => {
                     <UserMessage message={response.message} />
 
                     <Wrapper>
-                        <Markdown children={response.log} />
+                        <Markdown>
+                            {response.log}
+                        </Markdown>
                     </Wrapper>
                 </div>
             ))}

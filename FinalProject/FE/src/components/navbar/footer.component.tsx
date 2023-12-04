@@ -75,7 +75,7 @@ const FooterComponent = () => {
                     </ListItemIcon>
 
                     <ListItemText>
-                        This project's Github repository
+                        This project&apos;s Github repository
                     </ListItemText>
                 </MenuItem>
 
