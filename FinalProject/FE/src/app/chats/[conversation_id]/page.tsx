@@ -32,10 +32,7 @@ export default function Chats() {
     const conversation_id = (param as { conversation_id: string }).conversation_id;
     const router = useRouter();
 
-    useEffect(() => {
-        console.log("checker");
-    }, [responses]);
-
+    
     useEffect(() => {
         // this will run when the responses has been fetch, and will highlight the code
         if (hasFetched) {

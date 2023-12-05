@@ -8,7 +8,6 @@ import styles from "@/css/main/chat.module.css";
 
 
 const Chat: React.FC<{ responses: ResponseProps[] }> = ({ responses }) => {
-    console.log("Chat.tsx: renddering", responses);
     return (
         <>
             {responses.map((response) => (
