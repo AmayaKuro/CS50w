@@ -94,7 +94,7 @@ const Navbar: React.FC = () => {
                 transition={{ duration: 0.5 }}
             >
                 <div className={styles.navHeader}>
-                    <Image src="/favicon.ico" alt="logo" />
+                    <Image src="/favicon.ico" width={100} height={100} alt="logo" />
                 </div>
 
                 <div className={styles.navBody}>
