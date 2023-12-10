@@ -1,4 +1,5 @@
 import Markdown from 'markdown-to-jsx';
+import { renderToString } from 'react-dom/server';
 
 import { type ResponseProps } from "@/assets/providers/conversation";
 import Wrapper from './response/Wrapper';
@@ -9,8 +10,8 @@ import styles from "@/css/main/chat.module.css";
 import hljs from "highlight.js/lib/common";
 
 
-const HighLightSyntax: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const highlightedCode = hljs.highlightAuto(children?.toString() || "").value;
+const HighLightSyntax: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+    const highlightedCode = hljs.highlightAuto(renderToString(children) || "").value;
 
     return (
         <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
