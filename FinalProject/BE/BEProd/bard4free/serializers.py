@@ -16,12 +16,21 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(username=username, password=password)
         return user
     
-    def createFromGoogle(self):
+
+class GoogleAuthenticateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username", "google_id"]     
+
+    def create(self):
         username = self.validated_data["username"]
         google_id = self.validated_data["google_id"]
-        self.set_unusable_password()
         
-        user = User.objects.create_user(username=username, google_id=google_id)
+        user = User(username=username, google_id=google_id)
+        user.set_unusable_password()
+        
+        user.save()
+
         return user
 
 

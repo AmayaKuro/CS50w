@@ -21,7 +21,6 @@ node_modules/
 # Ignore secret file
 **/*_secret*.*
 
-
 # ============  FE  ============= #
 # dependencies
 /FE/node_modules

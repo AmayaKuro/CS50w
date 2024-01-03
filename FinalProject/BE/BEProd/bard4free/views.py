@@ -70,23 +70,33 @@ def GoogleLogin(request):
     )
 
     # Get the user info from Google
-    idinfo = getGoogleCredentials(code, state, code_verifier, CLIENT_ID)
+    idInfo = getGoogleCredentials(code, state, code_verifier, CLIENT_ID)
 
-    # Prepare the data for saving user (username is email)
-    data = {
-        "username": idinfo["email"],
-        "google_id": idinfo["sub"],
-    }
+    # If a user match credential's google_id, get that user for login
+    try:
+        user = User.objects.get(google_id=idInfo["sub"])
+    except User.DoesNotExist:
+        # Else if credential's email existed, get that user and add google_id to it 
+        if User.objects.filter(username=idInfo["email"]).exists():
+            user = User.objects.get(username=idInfo["email"])
+            user.google_id = idInfo["sub"]
+            user.save()
 
-    serializers = UserRegisterSerializer(data=data)
+        # else create new user
+        else:
+            # Prepare the data for saving user
+            data = {
+                "username": idInfo["email"],
+                "google_id": int(idInfo["sub"]),
+            }
 
-    # If user already exists, add google_id to the user, else create new user
-    if serializers.is_valid():
-        user = serializers.createFromGoogle()
-    else:
-        user = User.objects.get(username=data["username"])
-        user.google_id = data["google_id"]
-        user.save()
+            serializers = GoogleAuthenticateSerializer(data=data)
+
+            if serializers.is_valid():
+                user = serializers.create()
+            else:
+                print(serializers.errors)
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # Prepare the data for JWT
     # get_token() returns a instance "refresh" and has method "access" with return instance "access"
@@ -99,7 +109,7 @@ def GoogleLogin(request):
     payload = {
         # Necessary for Next-auth
         "tokens": {
-            "id_token": idinfo["id_token"],
+            "id_token": idInfo["id_token"],
 
             # Necessary for main content
             "user": {"name": user.username},

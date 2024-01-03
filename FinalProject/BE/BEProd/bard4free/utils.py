@@ -46,7 +46,7 @@ def getGoogleCredentials(code: str, state: str, code_verifier: str, CLIENT_ID: s
     )
 
     flow.code_verifier = code_verifier
-    flow.redirect_uri = "http://bard4free.vercel.app/api/auth/callback/google"
+    flow.redirect_uri = "https://bard4free.vercel.app/api/auth/callback/google"
 
     flow.fetch_token(code=code)
 
